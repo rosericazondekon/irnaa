@@ -58,8 +58,6 @@ For Windows users, **the installation of IRNAA might require manual installation
 
 # Read Counts from RNA-seq fastq files
 
-<br/>
-
 ### RNA-seq files format and file organization
 
 IRNAA expects RNA-seq files to be in the `.fastq.gz` format. The following file organization is also expected from the end user (with 4 paired-end RNA-seq samples):
