@@ -1,0 +1,2 @@
+#!/bin/bash
+Rscript $IRNAAPATH/irnaa.R

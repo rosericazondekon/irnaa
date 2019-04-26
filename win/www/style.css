@@ -1,0 +1,38 @@
+.shiny-progress {
+  top: 50%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -250px;
+}
+
+.shiny-notification {
+  top: 50%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -250px;
+}
+
+.shiny-notification-panel {
+    position: fixed;
+    bottom: 50%;
+    right: 50%;
+    margin-top: -100px;
+    margin-left: -250px;
+}
+
+.sidebar {
+  color: #FFF;
+  position: fixed;
+  width: 220px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.main-header {
+  position: fixed;
+  width:100%;
+}
+
+.content {
+  padding-top: 60px;
+}
