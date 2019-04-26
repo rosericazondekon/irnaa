@@ -11,7 +11,7 @@ IRNAA is a shiny application built for the purpose of facilitating Differential 
 <br/>
 <br/>
 Installation
------------
+================
 IRNAA is currently built to optimally run on Ubuntu (any version). It may run on other Operating Systems, especially Windows systems with the exception of the user to import read counts from fastq files.
 
 Before installation, please, make sure the following tools are installed and can be easily "called" from the terminal:
@@ -56,7 +56,7 @@ For Windows users, **the installation of IRNAA might require manual installation
 <br/>
 <br/>
 Read Counts from RNA-seq fastq files
------------
+================
 
 <br/>
 
