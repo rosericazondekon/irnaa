@@ -49,7 +49,7 @@ irnaa
 
 On windows, you may also run IRNAA by double-clicking on `irnaa.bat` located the `win` directory inside your locally extracted `irnaa` folder.
 
-<br/>
+
 ### Additional requirements for Windows Users
 For Windows users, **the installation of IRNAA might require manual installation of certain R libraries**. Also, the installation of <a href="http://gnuwin32.sourceforge.net/downlinks/tar-bin.php" target="_blank">TAR</a> is required to import TCGA data.
 
