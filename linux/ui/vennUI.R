@@ -28,6 +28,7 @@ venn <- tabItem(tabName = "venn", br(), br(),
                                             )
                 ))
                 ), hr(), br()
+                ,uiOutput("dld_venn_output")
                 ,verbatimTextOutput("venn_output")
                 # ,boxPlus(collapsible=T, closable=F, width = 10, title = "Venn Diagram"
                 #          ,status = "primary", solidHeader = TRUE

@@ -640,6 +640,13 @@ server = function(input, output, session) {
         actionButton("global_rc_btn", "Explore global read counts!")
       })
       
+      output$clust_method <- renderUI({
+        selectInput("hclust_method", "Choose clustering method:"
+                    ,c("complete","ward.D", "ward.D2", "single","average","mcquitty","median","centroid"), 
+                    selected = "complete", multiple = FALSE,
+                    selectize = TRUE, width = "200px", size = NULL)
+      })
+      
       output$DESeq2_runDGE <- renderUI({
         actionButton("DESeq2_runDGE_btn", "Run DESeq2 DGE Analysis!")
       })
@@ -710,11 +717,16 @@ server = function(input, output, session) {
         downloadButton("DESeq2_pcorr_dld_btn", "Download Correlation data!")
       })
       
+      output$pcorr_mat <- renderPlotly({
+        heatmaply::heatmaply(as.matrix(cor(counts.sf_normalized, method = "pearson")))
+      })
+      
       # plot Hierarchical clustering tree
       setProgress(value = 3/4, detail = "Hierarchical clustering tree...")
       output$DESeq2_hr_tree <- renderPlot(
-        plot(hclust(distance.m_rlog), labels = colnames(rlog.norm.counts),
-             main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
+        plot(hclust(distance.m_rlog,method=input$hclust_method), labels = colnames(rlog.norm.counts)
+             #,ann=FALSE
+             ,main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
       )
       
       # plot PCA
@@ -1029,8 +1041,8 @@ server = function(input, output, session) {
           )
           ,fluidRow(column(2, pickerInput(inputId = "d_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                            ,selected="ggplot"))
-                    ,column(2,numericInput("d_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
-                    ,column(2,numericInput("d_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("d_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("d_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
           )
           ,hr()
           ,actionButton("d_heatmap","Generate Heatmap!")
@@ -1442,8 +1454,8 @@ server = function(input, output, session) {
             )
             ,fluidRow(column(2, pickerInput(inputId = "l_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                              ,selected="ggplot"))
-                      ,column(2,numericInput("l_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
-                      ,column(2,numericInput("l_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
+                      ,column(2,numericInput("l_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
+                      ,column(2,numericInput("l_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
             )
             ,hr()
             ,actionButton("l_heatmap","Generate Heatmap!")
@@ -1889,8 +1901,8 @@ server = function(input, output, session) {
           )
           ,fluidRow(column(2, pickerInput(inputId = "e_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                            ,selected="ggplot"))
-                    ,column(2,numericInput("e_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
-                    ,column(2,numericInput("e_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("e_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("e_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
           )
           ,hr()
           ,actionButton("e_heatmap","Generate Heatmap!")
@@ -2170,7 +2182,11 @@ server = function(input, output, session) {
         DE_gns  <- UpSetR :: fromList(DE_list)
         output$venn_output <- renderPrint({
           out<-gplots::venn(DE_list, show.plot = F)
+          out <<- gsub('"','',capture.output(out))
           out
+        })
+        output$dld_venn_output <- renderUI({
+          downloadButton(outputId = "venn_output_btn",label = "Download Venn Output!")
         })
         output$venn_diagram <- renderPlot({
           gplots::venn(DE_list)
@@ -2180,6 +2196,11 @@ server = function(input, output, session) {
         })
       })
     })
+    
+    output$venn_output_btn <- downloadHandler(
+      filename = "VennDiagram_output.txt",
+      content = function(file){write(out,file)}
+    )
     
   })
   
