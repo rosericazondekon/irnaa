@@ -971,7 +971,7 @@ server = function(input, output, session) {
       setProgress(value = 3/4, detail = "Hierarchical clustering tree...")
       output$DESeq2_hr_tree <- renderPlot(
         plot(hclust(distance.m_rlog,method=input$hclust_method), labels = colnames(rlog.norm.counts)
-             #,ann=FALSE
+             ,ann=FALSE
              ,main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
       )
 
