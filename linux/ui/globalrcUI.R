@@ -20,6 +20,11 @@ DESeq2_grp <- tabItem(tabName = "DESeq2_grp", br(), br(),
                       #          ,dataTableOutput("DESeq2_pcorr", height="500px"),br()
                       #          ,uiOutput("DESeq2_pcorr_dld")
                       # )
+                      # ,boxPlus(collapsible=T, closable=F, width = 10, title = "Correlation Heatmap"
+                      #          # ,loadingState()
+                      #          ,status = "primary", solidHeader = TRUE
+                      #          ,plotlyOutput("pcorr_mat", height = '500px')
+                      # )
                       ,fluidRow(column(10,flipBox(id=2,main_img = "corr.svg"
                                                   ,header_img = "https://image.flaticon.com/icons/svg/119/119596.svg"
                                                   ,front_title = "Pairwise Correlation Table"
