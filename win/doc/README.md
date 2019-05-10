@@ -27,7 +27,7 @@ You may directly download IRNAA from <a href="http://www.github.com/rosericazond
 git clone https://github.com/rosericazondekon/irnaa.git
 ```
 
-Next, extract IRNAA to your local drive. 
+Next, extract IRNAA to your local drive.
 
 To install it on Ubuntu, from the command line interface, change your directory (using the `cd` command) to the extracted local `irnaa` folder on your local drive, and run the following script:
 
@@ -35,7 +35,18 @@ To install it on Ubuntu, from the command line interface, change your directory 
 sudo bash linux_install.sh && source ~/.bashrc
 ```
 
-On a Windows machine, double-click on the `win_install.bat` file (**as administrator**) to install IRNAA on your computer. To install it from the DOS command line interface, open your command prompt, change your directory (using the `cd` command) to the extracted local `irnaa` folder and execute the following code:
+On windows computers, before installing IRNAA, make sure that `R` is installed and can be run from the command line.
+
+To make `R` accessible from the command line interface, you may use the following instructions:
+- Find the installation path for `R` and copy it (e.g `C:\Program Files\R\R-3.5.1\bin`)
+- Open the start menu and type in “View advanced system settings”, click on “Environment variables”
+- Under “System variables”, select Path and click on edit
+- Click “New”, and add the folder address for R to there
+- Open windows Command Prompt and run `Rscript --version`. which should output the version of `R` installed on your computer.
+
+Now, double-click on the `win_install.bat` file (**as administrator**) to install IRNAA on your computer.
+
+To install it from the DOS command line interface, open your command prompt (**as administrator**), change your directory (using the `cd` command) to the extracted local `irnaa` folder and execute the following code:
 
 ```batch
 win_install
@@ -47,7 +58,8 @@ You should now launch the IRNAA shiny application by executing the `irnaa` comma
 irnaa
 ```
 
-On windows, you may also run IRNAA by double-clicking on `irnaa.bat` located the `win` directory inside your locally extracted `irnaa` folder.
+
+You may also run IRNAA by double-clicking on `irnaa.bat` located the `win` directory inside your locally extracted `irnaa` folder.
 
 <br/>
 ### Additional requirements for Windows Users
