@@ -1305,13 +1305,13 @@ server = function(input, output, session) {
       hm.mat_DGEgenes  <- log.norm.counts[DGEgenes_DESeq2, ]
       output$DESeq2_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Genes",
                     scale = "row", row_dend_left = input$d_rdl, plot_method = input$d_plot_method, dendrogram=input$d_dendogram,
                     Rowv = input$d_Rowv, Colv = input$d_Colv, #distfun = input$d_distfun, #hclustfun = "average",
                     colorbar=input$d_colorbar, dist_method = input$d_dist_method, hclust_method = input$d_hclust_method,
                     colors = eval(parse(text=input$d_colors)),
                     k_col = input$d_k_col, k_row = input$d_k_row,
-                    margins = c(60,100,40,20))
+                    margins = c(60,100,40,20)))
         })
       })
     })
@@ -1724,13 +1724,13 @@ server = function(input, output, session) {
       hm.mat_DGEgenes.lima  <- log.norm.counts[DGEgenes_lima, ]
       output$limma_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Genes",
                     scale = "row", row_dend_left = input$l_rdl, plot_method = input$l_plot_method, dendrogram=input$l_dendogram,
                     Rowv = input$l_Rowv, Colv = input$l_Colv, #distfun = input$l_distfun, #hclustfun = "average",
                     colorbar=input$l_colorbar, dist_method = input$l_dist_method, hclust_method = input$l_hclust_method,
                     colors = eval(parse(text=input$l_colors)),
                     k_col = input$l_k_col, k_row = input$l_k_row,
-                    margins = c(60,100,40,20))
+                    margins = c(60,100,40,20)))
         })
       })
     })
@@ -2175,13 +2175,13 @@ server = function(input, output, session) {
       hm.mat_DGEgenes.edgeR  <- log.norm.counts[DGEgenes_edgeR, ]
       output$edgeR_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Genes",
                     scale = "row", row_dend_left = input$e_rdl, plot_method = input$e_plot_method, dendrogram=input$e_dendogram,
                     Rowv = input$e_Rowv, Colv = input$e_Colv, #distfun = input$e_distfun, #hclustfun = "average",
                     colorbar=input$e_colorbar, dist_method = input$e_dist_method, hclust_method = input$e_hclust_method,
                     colors = eval(parse(text=input$e_colors)),#PiYG,
                     k_col = input$e_k_col, k_row = input$e_k_row,
-                    margins = c(60,100,40,20))
+                    margins = c(60,100,40,20)))
         })
       })
     })
