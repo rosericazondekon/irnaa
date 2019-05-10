@@ -260,37 +260,53 @@ server = function(input, output, session) {
       }
     })
 
+    #################################################
+    ### Import read counts from file
+    #################################################
     observeEvent(input$get_files_btn,{
-      dt <- filedata(input$datafile)
-      dat <- dt[,-1]
-      rownames(dat) <- dt[,1]
-      txi <<- list("counts"=dat)
-      txi.header <<- colnames(dat)
-      output$files_data_report <- renderPrint({
-        paste(dim(dat)[1],"genes and",dim(dat)[2],"samples have been loaded!")
-      })
-      DT_output <- dat
-      row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
-      output$files_data <- renderDataTable({DT_output} ,options = list(scrollX = TRUE), escape = F)
+      withProgress(message = "Loading read counts dataset... Please wait!",{
+        dt <- filedata(input$datafile)
+        if(any(duplicated(dt[,1]))){
+          output$files_data_report <- renderPrint({
+            paste("Read counts dataset has non unique feature IDs!", "Please upload a dataset with unique feature IDs!")
+          })
+          setProgress(value = 1, detail = "Done!")
+        }else{
+          setProgress(value = 2/5, detail = "Getting data...")
+          dat <- dt[,-1]
+          rownames(dat) <- dt[,1]
+          txi <<- list("counts"=dat)
+          txi.header <<- colnames(dat)
+          setProgress(value = 3/5, detail = "Reporting...")
+          output$files_data_report <- renderPrint({
+            paste(dim(dat)[1],"genes and",dim(dat)[2],"samples have been loaded!")
+          })
+          DT_output <- dat
+          row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
+          output$files_data <- renderDataTable({DT_output} ,options = list(scrollX = TRUE), escape = F)
 
-      output$sel_conds <- renderUI({
-        multiInput(
-          inputId = "sel_samp",
-          label = "Select samples for each condition:",
-          choices = NULL,
-          selected = txi.header[1:round(length(txi.header)/2,0)],
-          choiceNames = txi.header,
-          choiceValues = txi.header,
-          options = list(
-            enable_search = FALSE,
-            non_selected_header = "Condition A:",
-            selected_header = "Condition B:"
-          )
-        )
-      })
+          setProgress(value = 4/5, detail = "Data UI rendering...")
+          output$sel_conds <- renderUI({
+            multiInput(
+              inputId = "sel_samp",
+              label = "Select samples for each condition:",
+              choices = NULL,
+              selected = txi.header[1:round(length(txi.header)/2,0)],
+              choiceNames = txi.header,
+              choiceValues = txi.header,
+              options = list(
+                enable_search = FALSE,
+                non_selected_header = "Condition A:",
+                selected_header = "Condition B:"
+              )
+            )
+          })
 
-      output$set_cond <- renderUI({
-        actionButton("set_cond_btn2", "Set conditions!")
+          output$set_cond <- renderUI({
+            actionButton("set_cond_btn2", "Set conditions!")
+          })
+          setProgress(value = 1, detail = "Done!")
+        }
       })
     })
 
