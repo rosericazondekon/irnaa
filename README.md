@@ -39,8 +39,8 @@ To make `R` accessible from the command line interface, you may use the followin
 - Find the installation path for `R` and copy it (e.g `C:\Program Files\R\R-3.5.1\bin`)
 - Open the start menu and type in "View advanced system settings", click on "Environment variables"
 - Under "System variables", select Path and click on edit
-- Click "New", and add the folder address for R to there
-- Open windows Command Prompt and run `Rscript --version`. which should output the version of `R` installed on your computer.
+- Click "New", and paste in the folder address for R
+- Open windows Command Prompt and run `Rscript --version` which should output the version of `R` installed on your computer.
 
 Now, double-click on the `win_install.bat` file (**as administrator**) to install IRNAA on your computer.
 
