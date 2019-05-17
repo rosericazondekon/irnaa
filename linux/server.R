@@ -55,9 +55,9 @@ server = function(input, output, session) {
   # output$session<-renderPrint(session_info())
   # values <- reactiveValues()
   # setDir(session, input)
-  searchURL = "https://www.ncbi.nlm.nih.gov/gene/?term="
+  searchURL <- "http://useast.ensembl.org/Multi/Search/Results?q="#"https://www.ncbi.nlm.nih.gov/gene/?term="
   setDir(session, input)
-  volumes = getVolumes()
+  volumes <- getVolumes()
   smpDir <- "" #Global sample Directory variable
   wkd <- "" # Global working directory variable
   smp <- c() # Global samples vector variable
@@ -437,45 +437,45 @@ server = function(input, output, session) {
       tcga_DATA <- getTCGA(disease=input$disease_select, data.type=input$dataType)
       setProgress(value = 1/2,detail = "Preparing TCGA data...")
       if(!is.null(tcga_DATA)){
-      txi <<- list("counts"=tcga_DATA$dat)
-      # txi <<- list("counts"=tcga_data$dat, "lengths"=tcga_data$dat+1, "countsFromAbundance"="no")
-      txi.header <<- colnames(tcga_DATA$dat)
-      output$tcga_report <- renderPrint({
-        n_genes <- dim(tcga_DATA$dat)[1]
-        n_samples <- dim(tcga_DATA$dat)[2]
-        paste(n_genes,"genes and",n_samples,"samples have been imported")
-      })
+        txi <<- list("counts"=tcga_DATA$dat)
+        # txi <<- list("counts"=tcga_data$dat, "lengths"=tcga_data$dat+1, "countsFromAbundance"="no")
+        txi.header <<- colnames(tcga_DATA$dat)
+        output$tcga_report <- renderPrint({
+          n_genes <- dim(tcga_DATA$dat)[1]
+          n_samples <- dim(tcga_DATA$dat)[2]
+          paste(n_genes,"genes and",n_samples,"samples have been imported")
+        })
 
-      DT_output <- txi$counts
-      row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
-      output$tcga_data <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
-      output$tcga_data_dld <- renderUI({
-        downloadButton("tcga_data_dld_btn","Download TCGA data!")
-      })
+        DT_output <- txi$counts
+        row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
+        output$tcga_data <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
+        output$tcga_data_dld <- renderUI({
+          downloadButton("tcga_data_dld_btn","Download TCGA data!")
+        })
 
-      output$sel_conds <- renderUI({
-        multiInput(
-          inputId = "sel_samp",
-          label = "Select samples for each condition:",
-          choices = NULL,
-          selected = txi.header[1:round(length(txi.header)/2,0)],
-          choiceNames = txi.header,
-          choiceValues = txi.header,
-          options = list(
-            enable_search = FALSE,
-            non_selected_header = "Condition A:",
-            selected_header = "Condition B:"
+        output$sel_conds <- renderUI({
+          multiInput(
+            inputId = "sel_samp",
+            label = "Select samples for each condition:",
+            choices = NULL,
+            selected = txi.header[1:round(length(txi.header)/2,0)],
+            choiceNames = txi.header,
+            choiceValues = txi.header,
+            options = list(
+              enable_search = FALSE,
+              non_selected_header = "Condition A:",
+              selected_header = "Condition B:"
+            )
           )
-        )
-      })
-      setProgress(value = 1,detail = "Done!")
-      output$set_cond <- renderUI({
-        actionButton("set_cond_btn2", "Set conditions!")
-      })}else{
-        output$tcga_report <- renderPrint(
-          "Error: No data available for download. Please ensure the data is available from TCGA."
-        )
-      }
+        })
+        setProgress(value = 1,detail = "Done!")
+        output$set_cond <- renderUI({
+          actionButton("set_cond_btn2", "Set conditions!")
+        })}else{
+          output$tcga_report <- renderPrint(
+            "Error: No data available for download. Please ensure the data is available from TCGA."
+          )
+        }
       })
 
     })
@@ -555,11 +555,17 @@ server = function(input, output, session) {
                                                               "Zebrafish" = "org.Dr.eg.db", "Other"="other"),
                                                inline=T, selected = "org.Hs.eg.db")
           )
-          ,column(6,
+          ,column(4,
                   radioButtons("refType",
                                label = h3("Select the reference source:"),
                                choices = list("RefSeq NCBI Transcripts" = "REFSEQ", "Ensembl transcripts" = "ENSEMBLTRANS"),
                                inline=T, selected = "REFSEQ")
+          )
+          ,column(4,
+                  radioButtons("transOut",
+                               label = h3("Level estimate:"),
+                               choices = list("Gene level" = "FALSE", "Transcript level" = "TRUE"),
+                               inline=T, selected = "FALSE")
           )
           ))
         })
@@ -574,7 +580,7 @@ server = function(input, output, session) {
         })
 
         output$tr_output <- renderUI({
-          actionButton("import","import transcript-level estimates")
+          actionButton("import","Import Estimates!")
         })
 
         output$import_output <- renderUI({
@@ -640,8 +646,12 @@ server = function(input, output, session) {
       # txt2gene<-txt2gene[,-3]
       txt2gene<-txt2gene[complete.cases(txt2gene),]
 
+      # transcript_out <- FALSE
+      #
+      # if(input$refType == "ENSEMBLTRANS"){transcript_out <- TRUE}
+
       # Import quantification reads into R
-      txi <<- tximport(files, type = "salmon", tx2gene = txt2gene,ignoreTxVersion=T)
+      txi <<- tximport(files, type = "salmon", tx2gene = txt2gene,ignoreTxVersion=T,txOut = as.logical(input$transOut))
 
       output$readCounts_dld <- renderUI({
         downloadButton(outputId = "counts_download",label = "Download transcripts data!")
@@ -902,13 +912,6 @@ server = function(input, output, session) {
         actionButton("global_rc_btn", "Explore global read counts!")
       })
 
-      output$clust_method <- renderUI({
-        selectInput("hclust_method", "Choose clustering method:"
-                    ,c("complete","ward.D", "ward.D2", "single","average","mcquitty","median","centroid"),
-                    selected = "complete", multiple = FALSE,
-                    selectize = TRUE, width = "200px", size = NULL)
-      })
-
       output$DESeq2_runDGE <- renderUI({
         actionButton("DESeq2_runDGE_btn", "Run DESeq2 DGE Analysis!")
       })
@@ -986,9 +989,8 @@ server = function(input, output, session) {
       # plot Hierarchical clustering tree
       setProgress(value = 3/4, detail = "Hierarchical clustering tree...")
       output$DESeq2_hr_tree <- renderPlot(
-        plot(hclust(distance.m_rlog,method=input$hclust_method), labels = colnames(rlog.norm.counts)
-             ,ann=FALSE
-             ,main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
+        plot(hclust(distance.m_rlog), labels = colnames(rlog.norm.counts),
+             main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
       )
 
       # plot PCA
@@ -1087,7 +1089,7 @@ server = function(input, output, session) {
         setProgress(value = 15/n, detail = "UI rendering...")
         output$filterGenes <- renderUI({
           tagList(fluidRow(column(5
-                                  ,selectInput("gprof_select", "Filter genes by:",colnames(DGE_data),
+                                  ,selectInput("gprof_select", "Filter features by:",colnames(DGE_data),
                                                selected = "padj", multiple = FALSE,
                                                selectize = TRUE, width = "200px", size = NULL))
                            ,column(5
@@ -1136,7 +1138,7 @@ server = function(input, output, session) {
                                                                  ,round = -2))
                            )
           )
-          ,actionButton("filt_genes_btn","Filter genes!")
+          ,actionButton("filt_genes_btn","Filter features!")
           ,verbatimTextOutput("filt_genes")
           )
         })
@@ -1247,7 +1249,7 @@ server = function(input, output, session) {
                                                            ,round = -2))
                               )
             )
-            ,actionButton("d_filter","Filter genes!"),br(), hr()
+            ,actionButton("d_filter","Filter features!"),br(), hr()
             ,verbatimTextOutput("DESeq2_num_dge"), hr()
             ,uiOutput("d_heatmap_settings"), br()
             ,hr()
@@ -1303,8 +1305,8 @@ server = function(input, output, session) {
           )
           ,fluidRow(column(2, pickerInput(inputId = "d_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                            ,selected="ggplot"))
-                    ,column(2,numericInput("d_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
-                    ,column(2,numericInput("d_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("d_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("d_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
           )
           ,hr()
           ,actionButton("d_heatmap","Generate Heatmap!")
@@ -1312,7 +1314,7 @@ server = function(input, output, session) {
         })
       }
       output$DESeq2_num_dge <- renderPrint({
-        list("DGE"=paste(length(DGEgenes_DESeq2),"differentially expressed genes"),"Differentially Expressed Genes"=DGEgenes_DESeq2)
+        list("DGE"=paste(length(DGEgenes_DESeq2),"differentially expressed features"),"Differentially Expressed features"=DGEgenes_DESeq2)
       })
     })
 
@@ -1321,7 +1323,7 @@ server = function(input, output, session) {
       hm.mat_DGEgenes  <- log.norm.counts[DGEgenes_DESeq2, ]
       output$DESeq2_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Features",
                     scale = "row", row_dend_left = input$d_rdl, plot_method = input$d_plot_method, dendrogram=input$d_dendogram,
                     Rowv = input$d_Rowv, Colv = input$d_Colv, #distfun = input$d_distfun, #hclustfun = "average",
                     colorbar=input$d_colorbar, dist_method = input$d_dist_method, hclust_method = input$d_hclust_method,
@@ -1349,7 +1351,7 @@ server = function(input, output, session) {
           gprofile_genes <<- unique(apply(as.data.frame(gprofile_genes),MARGIN = 1,
                    FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
                    }))
-        list("Number of filtered genes:"=paste(length(gprofile_genes),"filtered genes!"),"Genes:"=gprofile_genes)
+        list("Number of filtered features:"=paste(length(gprofile_genes),"filtered features!"),"Features:"=gprofile_genes)
       })
       output$perf_gprof_btn <- renderUI(actionButton("gprofile_btn","Perform gProfile pathway Analysis!"))
     })
@@ -1367,7 +1369,7 @@ server = function(input, output, session) {
         ))
         query=paste(gprofile_genes,collapse = "%0A")
         setProgress(value = 3/6, detail = "gProfiler link generation...")
-        gprof_url <- a("Click me to be directed to gprofiler Website!"
+        gprof_url <- a("Click me to be directed to gprofile Website!"
                        ,href=paste0("https://biit.cs.ut.ee/gprofiler/gost"#"https://biit.cs.ut.ee/gprofiler/index.cgi"
                                     ,'?query=',query,'&organism=',gpr_organism
                                     ,"&significant=",as.numeric(input$significant)
@@ -1382,8 +1384,8 @@ server = function(input, output, session) {
         setProgress(value = 4/6, detail = "WebGestalt link generation...")
         wgst_url <- a("Click me to be directed to WebGestalt Website!"
                       ,href=paste0("http://www.webgestalt.org/option.php",'?gene_list=',query,'&organism=',gpr_organism
-                                   ,"&enrich_method=ORA&fdr_method=BH&enriched_database_category=pathway"
-                                   ,"&enriched_database_name=Reactome&sig_method=top&sig_value=5"
+                                   ,"&enrich_method=ORA&fdr_method=BH&enriched_database_category=geneontology"
+                                   ,"&enriched_database_name=Biological_Process_noRedundant&sig_method=top&sig_value=5"
                                    ,"&max_num=200&id_type=genesymbol"
                                    ,"&ref_set=genome")
                       ,target="_blank")
@@ -1559,7 +1561,7 @@ server = function(input, output, session) {
                                                            ,round = -2))
                               )
             )
-            ,actionButton("l_filter","Filter genes!"),br(), hr()
+            ,actionButton("l_filter","Filter features!"),br(), hr()
             ,verbatimTextOutput("limma_num_dge"), hr()
             ,uiOutput("l_heatmap_settings"), br()
             ,hr()
@@ -1569,7 +1571,7 @@ server = function(input, output, session) {
         ##############################limma_filter_genes(on limma_gprofile)
         output$limma_filterGenes <- renderUI({
           tagList(fluidRow(column(5
-                                  ,selectInput("limma_gprof_select", "Filter genes by:",colnames(DGE.results_limma),
+                                  ,selectInput("limma_gprof_select", "Filter features by:",colnames(DGE.results_limma),
                                                # ,list("P-value"="pvalue", "Adjusted P-value"="padj", "Fold Change"="log2FoldChange"
                                                #       ,"Base Mean"="baseMean", "lfcSE"="lfcSE", "stat"="stat"),
                                                selected = "logFC", multiple = FALSE,
@@ -1621,7 +1623,7 @@ server = function(input, output, session) {
                                                                  ,round = -2))
                            )
           )
-          ,actionButton("limma_filt_genes_btn","Filter genes!")
+          ,actionButton("limma_filt_genes_btn","Filter features!")
           ,verbatimTextOutput("limma_filt_genes")
           )
         })
@@ -1722,8 +1724,8 @@ server = function(input, output, session) {
             )
             ,fluidRow(column(2, pickerInput(inputId = "l_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                              ,selected="ggplot"))
-                      ,column(2,numericInput("l_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
-                      ,column(2,numericInput("l_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
+                      ,column(2,numericInput("l_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
+                      ,column(2,numericInput("l_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
             )
             ,hr()
             ,actionButton("l_heatmap","Generate Heatmap!")
@@ -1731,7 +1733,7 @@ server = function(input, output, session) {
         })
       }
       output$limma_num_dge <- renderPrint({
-        list("DGE"=paste(length(DGEgenes_lima),"differentially expressed genes"),"Differentially Expressed Genes"=DGEgenes_lima)
+        list("DGE"=paste(length(DGEgenes_lima),"differentially expressed features"),"Differentially Expressed features"=DGEgenes_lima)
       })
     })
 
@@ -1740,7 +1742,7 @@ server = function(input, output, session) {
       hm.mat_DGEgenes.lima  <- log.norm.counts[DGEgenes_lima, ]
       output$limma_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Features",
                     scale = "row", row_dend_left = input$l_rdl, plot_method = input$l_plot_method, dendrogram=input$l_dendogram,
                     Rowv = input$l_Rowv, Colv = input$l_Colv, #distfun = input$l_distfun, #hclustfun = "average",
                     colorbar=input$l_colorbar, dist_method = input$l_dist_method, hclust_method = input$l_hclust_method,
@@ -1775,7 +1777,7 @@ server = function(input, output, session) {
           limma_gprofile_genes<<- unique(apply(as.data.frame(limma_gprofile_genes),MARGIN = 1,
                                      FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
                                      }))
-        list("Number of filtered genes:"=paste(length(limma_gprofile_genes),"filtered genes!"),"Genes:"=limma_gprofile_genes)
+        list("Number of filtered features:"=paste(length(limma_gprofile_genes),"filtered features!"),"Features:"=limma_gprofile_genes)
       })
       output$l_perf_gprof_btn <- renderUI(actionButton("limma_gprofile_btn","Perform gProfile pathway Analysis!"))
     })
@@ -2010,7 +2012,7 @@ server = function(input, output, session) {
                                                            ,round = -2))
                               )
             )
-            ,actionButton("e_filter","Filter genes!"),br(), hr()
+            ,actionButton("e_filter","Filter features!"),br(), hr()
             ,verbatimTextOutput("edgeR_num_dge"), hr()
             ,uiOutput("e_heatmap_settings"), br()
             ,hr()
@@ -2030,7 +2032,7 @@ server = function(input, output, session) {
       output$edgeR_filterGenes <- renderUI({
         edgeR_data <- as.data.frame(edgeR_fit_mod[[input$edgeR_type_sel]])
         tagList(fluidRow(column(5
-                                ,selectInput("edgeR_gprof_select", "Filter genes by:",colnames(DGE.results_edgeR),
+                                ,selectInput("edgeR_gprof_select", "Filter features by:",colnames(DGE.results_edgeR),
                                              selected = "logFC", multiple = FALSE,
                                              selectize = TRUE, width = "200px", size = NULL))
                          ,column(5
@@ -2081,7 +2083,7 @@ server = function(input, output, session) {
                                                                ,round = -2))
                          )
         )
-        ,actionButton("edgeR_filt_genes_btn","Filter genes!")
+        ,actionButton("edgeR_filt_genes_btn","Filter features!")
         ,verbatimTextOutput("edgeR_filt_genes")
         )
       })
@@ -2172,8 +2174,8 @@ server = function(input, output, session) {
           )
           ,fluidRow(column(2, pickerInput(inputId = "e_plot_method", label = "Plot method:", choices = c("plotly", "ggplot")
                                            ,selected="ggplot"))
-                    ,column(2,numericInput("e_k_col", "#of clusters (col):", 1, min = 1, max = 100, step = 1))
-                    ,column(2,numericInput("e_k_row", "#of clusters (row):", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("e_k_col", "k_col:", 1, min = 1, max = 100, step = 1))
+                    ,column(2,numericInput("e_k_row", "k_row:", 1, min = 1, max = 100, step = 1))
           )
           ,hr()
           ,actionButton("e_heatmap","Generate Heatmap!")
@@ -2181,7 +2183,7 @@ server = function(input, output, session) {
         })
       }
       output$edgeR_num_dge <- renderPrint({
-        list("DGE"=paste(length(DGEgenes_edgeR),"differentially expressed genes"),"Differentially Expressed Genes"=DGEgenes_edgeR)
+        list("DGE"=paste(length(DGEgenes_edgeR),"differentially expressed features"),"Differentially Expressed features"=DGEgenes_edgeR)
       })
     })
 
@@ -2191,7 +2193,7 @@ server = function(input, output, session) {
       hm.mat_DGEgenes.edgeR  <- log.norm.counts[DGEgenes_edgeR, ]
       output$edgeR_heatmap <- renderPlotly({
         withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-          isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Genes",
+          isolate(heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Features",
                     scale = "row", row_dend_left = input$e_rdl, plot_method = input$e_plot_method, dendrogram=input$e_dendogram,
                     Rowv = input$e_Rowv, Colv = input$e_Colv, #distfun = input$e_distfun, #hclustfun = "average",
                     colorbar=input$e_colorbar, dist_method = input$e_dist_method, hclust_method = input$e_hclust_method,
@@ -2218,7 +2220,7 @@ server = function(input, output, session) {
           edgeR_gprofile_genes <<- unique(apply(as.data.frame(edgeR_gprofile_genes),MARGIN = 1,
                    FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
                    }))
-        list("Number of filtered genes:"=paste(length(edgeR_gprofile_genes),"filtered genes!"),"Genes:"=edgeR_gprofile_genes)
+        list("Number of filtered features:"=paste(length(edgeR_gprofile_genes),"filtered features!"),"Features:"=edgeR_gprofile_genes)
       })
       output$e_perf_gprof_btn <- renderUI(actionButton("edgeR_gprofile_btn","Perform gProfile pathway Analysis!"))
     })
@@ -2450,6 +2452,7 @@ server = function(input, output, session) {
                                 }))
           DE_list[["limma"]] <- lma
         }
+
         DE_gns  <- UpSetR :: fromList(DE_list)
         output$venn_output <- renderPrint({
           out<-gplots::venn(DE_list, show.plot = F)

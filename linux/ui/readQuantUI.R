@@ -37,7 +37,7 @@ readQuant <- tabItem(tabName = "readQuant", br(), br(),
                                                                     ,column(width=4, uiOutput("quant_sf_files"), uiOutput("view_quant"))
                                                           )
                                                  )
-                                                 ,boxPlus(collapsible=T, closable = F, width = 8, title = "Import transcript-level estimates"
+                                                 ,boxPlus(collapsible=T, closable = F, width = 8, title = "Import Estimates"
                                                           ,status = "primary", solidHeader = TRUE
                                                           ,uiOutput("annot"), uiOutput("cond_annot"), uiOutput("tr_output"),uiOutput("import_output")
                                                           ,uiOutput("tbChoice"), uiOutput("tb"), uiOutput("readCounts_dld")
