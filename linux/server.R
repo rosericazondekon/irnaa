@@ -654,7 +654,7 @@ server = function(input, output, session) {
       txi <<- tximport(files, type = "salmon", tx2gene = txt2gene,ignoreTxVersion=T,txOut = as.logical(input$transOut))
 
       output$readCounts_dld <- renderUI({
-        downloadButton(outputId = "counts_download",label = "Download transcripts data!")
+        downloadButton(outputId = "counts_download",label = "Download Expression data!")
       })
 
       output$tbChoice <- renderUI({
