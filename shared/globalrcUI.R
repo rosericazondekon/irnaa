@@ -32,7 +32,7 @@ DESeq2_grp <- tabItem(tabName = "DESeq2_grp", br(), br(),
                       #                             ,front_btn_text = "View Correlation Matrix"
                       #                             ,back_btn_text = "Back to Correlation Table", width = 10
                       #                             ,tagList(dataTableOutput("DESeq2_pcorr", height="500px",width="99%"),br()
-                      #                                      ,uiOutput("DESeq2_pcorr_dld")
+                      #                               ,uiOutput("DESeq2_pcorr_dld")
                       #                             )
                       #                             ,back_content = tagList(
                       #                               plotlyOutput("pcorr_mat", height = '500px')

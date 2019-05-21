@@ -1,5 +1,5 @@
 ##readQuant: read Quantification
-readQuant <- tabItem(tabName = "readQuant", br(), br(),
+readQuant <- tabItem(tabName = "readQuant", br(), br(), 
                      h2("Read Quantification"), br()
                      # ,radioButtons("quantType", h3(""),list("From FASTQ files"="fqc","From TCGA"="tcga","From files"="files"), selected = "fqc", inline=T)
                      ,radioGroupButtons(inputId = "quantType"
@@ -11,33 +11,47 @@ readQuant <- tabItem(tabName = "readQuant", br(), br(),
                      ,hr()
                      ,conditionalPanel(condition = "input.quantType == 'fqc'"
                                        ,fluidRow(
-                                         column(width=12
-                                                ,boxPlus(collapsible=T, closable=F, width = 8, title = "Transcriptome Reference File"
-                                                         ,status = "primary", solidHeader = TRUE,
-                                                         shinyFilesButton("Btn_GetFile", "Choose a reference file" ,
-                                                                          title = "Please select a file:", multiple = FALSE,
-                                                                          buttonType = "default", class = NULL),
-                                                         verbatimTextOutput("txt_file"),
-                                                         br(), br()
-                                                         ,fluidRow(column(width=4, offset = 0, uiOutput("create_index_btn")))#align ="center",
+                                         column(width = 10
+                                                ,boxPlus(collapsible=T, closable=F, width = 9, title = "Detected FASTQ samples"
+                                                         ,status = "primary", solidHeader = TRUE
+                                                         ,directoryInput('directory', label = 'select working directory (containing your "data" folder)', value = '~')
+                                                         # ,shinyDirButton("directory", "Select Working Directory!", "Please select a folder")
+                                                         # ,verbatimTextOutput("workDir")
+                                                         ,uiOutput("summary"), verbatimTextOutput("sampleMsg")
+                                                         ,fluidRow(column(width=4, offset = 0, uiOutput("fastqc"))
+                                                                   ,column(width=4, offset = 0, uiOutput("multiQc_report"))
+                                                                   ,column(width=4, offset = 0, uiOutput("delQc_report")))
+                                                ))
+                                         ,column(width=12
+                                                 ,boxPlus(collapsible=T, closable=F, width = 9, title = "Transcriptome Reference File"
+                                                          ,status = "primary", solidHeader = TRUE,
+                                                          shinyFilesButton("Btn_GetFile", "Choose a reference file" ,
+                                                                           title = "Please select a file:", multiple = FALSE,
+                                                                           buttonType = "default", class = NULL),
+                                                          verbatimTextOutput("txt_file"),
+                                                          br(), br()
+                                                         ,fluidRow(column(width = 4, offset = 0, uiOutput("create_index_btn"))
+                                                                   ,column(width = 4, offset = 0, uiOutput("delete_index_btn"),br()))#align ="center",
                                                          ,withSpinner(verbatimTextOutput("index_output")
                                                                       ,size=1,proxy.height=200,type=sample(c(1,4,5:8), 1))
                                                 )
                                          )
                                          ,column(width=12
-                                                 ,boxPlus(collapsible=T, closable=F, width = 8, title = "Read Quantification"
+                                                 ,boxPlus(collapsible=T, closable=F, width = 9, title = "Read Quantification"
                                                           ,status = "primary", solidHeader = TRUE
                                                           ,uiOutput('quantSamples')
-                                                          ,fluidRow(column(width=4, offset = 0, uiOutput("quant_read"))
-                                                                    ,column(width=3, offset = 2, uiOutput("nCores")))
+                                                          ,fluidRow(column(width=3, offset = 0, uiOutput("quant_read"))
+                                                                    ,column(width=4, offset = 1, uiOutput("nCores"))
+                                                                    ,column(width=3, offset = 1, uiOutput("delete_quant_btn")))
+                                                          # ,fluidRow(column(width=4, offset = 0, uiOutput("delete_quant_btn")))
                                                  )
-                                                 ,boxPlus(collapsible=T, closable = F, width = 8, title = "Read Quantification Logs"
+                                                 ,boxPlus(collapsible=T, closable = F, width = 9, title = "Read Quantification Logs"
                                                           ,status = "primary", solidHeader = T, actionButton("show_logs","Show Details!")
                                                           ,fluidRow(column(width=4, uiOutput("quant_log_files"), uiOutput("view_log"))
                                                                     ,column(width=4, uiOutput("quant_sf_files"), uiOutput("view_quant"))
                                                           )
                                                  )
-                                                 ,boxPlus(collapsible=T, closable = F, width = 8, title = "Import Estimates"
+                                                 ,boxPlus(collapsible=T, closable = F, width = 10, title = "Import Estimates"
                                                           ,status = "primary", solidHeader = TRUE
                                                           ,uiOutput("annot"), uiOutput("cond_annot"), uiOutput("tr_output"),uiOutput("import_output")
                                                           ,uiOutput("tbChoice"), uiOutput("tb"), uiOutput("readCounts_dld")
@@ -51,24 +65,24 @@ readQuant <- tabItem(tabName = "readQuant", br(), br(),
                                                 ,boxPlus(collapsible=T, closable=F, width = 10, title = "Export TCGA data"
                                                          ,status = "primary", solidHeader = TRUE
                                                          ,fluidRow(column(6,selectInput("disease_select", "Select a table"
-                                                                                        ,list("adrenocortical carcinoma (ACC)"="ACC", "bladder urothelial carcinom (BLCA)"="BLCA",
+                                                                                        ,list("adrenocortical carcinoma (ACC)"="ACC", "bladder urothelial carcinom (BLCA)"="BLCA", 
                                                                                               "breast invasive carcinoma (BRCA)"="BRCA", "cervical and endocervical cancers (CESC)"="CESC",
-                                                                                              "cholangiocarcinoma (CHOL)"="CHOL", "colon adenocarcinoma (COAD)"="COAD",
-                                                                                              "colorectal adenocarcinoma (COADREAD)"="COADREAD", "large B-cell lymphoma (DLBC)"="DLBC",
-                                                                                              "esophageal carcinoma (ESCA)"="ESCA", "FFPE Pilot Phase II (FPPP)"="FPPP",
+                                                                                              "cholangiocarcinoma (CHOL)"="CHOL", "colon adenocarcinoma (COAD)"="COAD", 
+                                                                                              "colorectal adenocarcinoma (COADREAD)"="COADREAD", "large B-cell lymphoma (DLBC)"="DLBC", 
+                                                                                              "esophageal carcinoma (ESCA)"="ESCA", "FFPE Pilot Phase II (FPPP)"="FPPP", 
                                                                                               "glioblastoma multiforme (GBM)"="GBM", "glioma (GBMLGG)"="GBMLGG",
-                                                                                              "head and neck squamous cell carcinoma (HNSC)"="HNSC", "kidney chromophobe (KICH)"="KICH",
+                                                                                              "head and neck squamous cell carcinoma (HNSC)"="HNSC", "kidney chromophobe (KICH)"="KICH", 
                                                                                               "pan-kidney cohort (KIPAN = KICH+KIRC+KIRP)"="KIPAN", "kidney renal clear cell carcinoma (KIRC)"="KIRC",
-                                                                                              "kidney renal papillary cell carcinoma (KIRP)"="KIRP", "acute myeloid leukemia (LAML)"="LAML",
-                                                                                              "brain lower grade glioma (LGG)"="LGG", "liver hepatocellular carcinoma (LIHC)"="LIHC",
-                                                                                              "lung adenocarcinoma (LUAD)"="LUAD", "lung squamous cell carcinoma (LUSC)"="LUSC",
-                                                                                              "mesothelioma (MESO)"="MESO", "ovarian serous cystadenocarcinoma (OV)"="OV",
+                                                                                              "kidney renal papillary cell carcinoma (KIRP)"="KIRP", "acute myeloid leukemia (LAML)"="LAML", 
+                                                                                              "brain lower grade glioma (LGG)"="LGG", "liver hepatocellular carcinoma (LIHC)"="LIHC", 
+                                                                                              "lung adenocarcinoma (LUAD)"="LUAD", "lung squamous cell carcinoma (LUSC)"="LUSC", 
+                                                                                              "mesothelioma (MESO)"="MESO", "ovarian serous cystadenocarcinoma (OV)"="OV", 
                                                                                               "pancreatic adenocarcinoma (PAAD)"="PAAD", "pheochromocytoma and paraganglioma (PCPG)"="PCPG",
-                                                                                              "prostate adenocarcinoma (PRAD)"="PRAD", "rectum adenocarcinoma (READ)"="READ",
+                                                                                              "prostate adenocarcinoma (PRAD)"="PRAD", "rectum adenocarcinoma (READ)"="READ", 
                                                                                               "sarcoma (SARC)"="SARC", "skin cutaneous melanoma (SKCM)"="SKCM", "stomach adenocarcinoma (STAD)"="STAD",
                                                                                               "testicular germ cell tumors (TGCT)"="TGCT", "thyroid carcinoma (THCA)"="THCA",
-                                                                                              "thymoma (THYM)"="THYM", "uterine corpus endometrial carcinoma (UCEC)"="UCEC",
-                                                                                              "uterine carcinosarcoma (UCS)"="UCS", "uveal melanoma (UVM)"="UVM"),
+                                                                                              "thymoma (THYM)"="THYM", "uterine corpus endometrial carcinoma (UCEC)"="UCEC", 
+                                                                                              "uterine carcinosarcoma (UCS)"="UCS", "uveal melanoma (UVM)"="UVM"), 
                                                                                         selected = "OV", multiple = FALSE,
                                                                                         selectize = TRUE, width = "400px", size = NULL))
                                                                    ,column(4,selectInput("dataType", "Select a data type"

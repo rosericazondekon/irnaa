@@ -4,7 +4,7 @@ header <- dashboardHeaderPlus(
     span(class = "logo-lg", "IRNAA"), 
     img(src = "analytics.png"))#"IRSA"
   ,fixed = TRUE
-  ,enable_rightsidebar = TRUE
+  ,enable_rightsidebar = FALSE#TRUE
   # ,rightSidebarIcon = "navicon"
   # ,left_menu = tagList(
   #   dropdownBlock(
