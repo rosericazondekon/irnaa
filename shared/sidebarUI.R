@@ -4,7 +4,7 @@
 sidebar = dashboardSidebar(
   hr(),
   sidebarMenu(id="tabs" #,style = "position: fixed; overflow: visible; width: 225px; white-space: nowrap;"
-              ,menuItem("QC Check", tabName="qcCheck", icon=icon("stethoscope"), selected=TRUE)
+              # ,menuItem("QC Check", tabName="qcCheck", icon=icon("stethoscope"), selected=TRUE)
               ,menuItem("Read Quantification", tabName = "readQuant", icon=icon("flask"))
               ,menuItem("Datasets", tabName = "DESeq2", icon = icon("hdd-o"))
               ,menuItem("Normalization", tabName = "dataNorm", icon = icon("line-chart"))
@@ -39,8 +39,8 @@ rightsidebar <- rightSidebar(
     id = 1,
     title = "Working Directory",
     icon = "desktop",
-    active = TRUE,
-    directoryInput('directory', label = 'select working directory', value = '~')
+    active = F#TRUE,
+    # directoryInput('directory', label = 'select working directory', value = '~')
     # sliderInput(
     #   "obs",
     #   "Number of observations:",

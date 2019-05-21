@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------
 #  Roseric Azondekon,
 #  December 17, 2018
-#  Last Update: February 11, 2019
+#  Last Update: May 21, 2019
 #  ZSPH, Milwaukee, WI, USA
 #-------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ repositories <<- c("https://cloud.r-project.org", "https://bioconductor.org/pack
 packages <- c("shinydashboardPlus", "shiny", "shinydashboard", "devtools", "vsn", "hexbin", "UpSetR", "gplots", "ROCR", "NMF", "DT",
               "org.Hs.eg.db", "org.Mm.eg.db", "org.Dr.eg.db", "pheatmap", "tximport", "readr", "TxDb.Hsapiens.UCSC.hg19.knownGene", 
               "rmarkdown", "edgeR", "shinyWidgets", "shinycssloaders", "CNTools", "openxlsx", "VennDiagram", "plyr", #"shinyjs",
-              "plotly", "heatmaply", "cowplot", "dplyr", "R6", "rlang", "httpud", "jsonlite", "later",
+              "plotly", "heatmaply", "cowplot", "dplyr", "R6", "rlang", "httpud", "jsonlite", "later", "codetools",
               "DESeq2","ggpubr", "ggplot2", "limma", "biomaRt", "htmlwidgets", "AnnotationDbi", "Biobase", "ensembldb", "shinyjqui",
               "styler", "shinyAce","shinyFiles", "d3heatmap", "rhandsontable","magrittr","shinyjs","gProfileR", "TCGA2STAT") # CRAN packages
 

@@ -1,3 +1,3 @@
 @echo off
-Rscript "%IRNAAPATH%/irnaa.R"
+Rscript %IRNAAPATH%/irnaa.R
 pause
