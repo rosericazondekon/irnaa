@@ -8,8 +8,7 @@ February 14, 2019
 
 IRNAA is a shiny application built for the purpose of facilitating Differential Gene Expression (DGE) analysis. IRNAA integrates command line tools such as `salmon`, `fastQC`, `multiQC` with DGE `R` packages such as `DESeq2`, `edgeR`, and `limma-voom`, and hides all the abstractions and coding hurdles from the end user. IRNAA makes it possible for the user to either preprocess fastq files and import read counts into the application from the fastq preprocessed files, or directly import their read counts into the application, or import RNA-seq datasets directly from the The Cancer Genome Atlas (TCGA). Finally, IRNAA also integrates other tools such as `gProfiler` and `WebGestalt` for Gene Pathway Analysis. So far, IRNAA preprocesses both **paired-end** and **single-end** fastq files. IRNAA is a work in progress and might, in the future, integrate other tools such as `STAR`, `samR`, etc.
 
-<br/>
-<br/>
+
 # Installation
 
 IRNAA is currently built to optimally run on Ubuntu (any version). It also runs on Windows systems with no to little support for fastq files pre-processing and data import from The Cancer Genome Atlas (TCGA).
@@ -69,8 +68,7 @@ You may also run IRNAA by double-clicking on the `irnaa.bat` file located the `w
 - For Windows users, **the installation of IRNAA might require manual installation of certain R libraries**.
 - Currently, `IRNAA` is compatible with all major versions of `R 3.4` and `R 3.5`. It is yet to be compatible with the newly released `R 3.6`.
 
-<br/>
-<br/>
+
 # Read Counts from RNA-seq fastq files
 
 
@@ -128,11 +126,11 @@ IRNAA expects a reference transcriptome in the `.fa` or `.fna` format. Although 
 ### Read Quantification
 For read quantification from FASTQ files, it is important to choose the correct reference source when importing Gene level estimates. By default, `IRNAA` provides gene annotation for Human, Mouse, and Zebrafish. When working with a different species, the species annotation database (e.g. `org.Bt.eg.db` for Bovine) can be specified and `IRNAA` will automatically install it and use it to import gene level estimates. A full list of the Genome wide annotation database packages is available on the <a href="https://bioconductor.org/packages/release/BiocViews.html#___AnnotationData" target="_blank">Bioconductor AnnotationData page</a>.
 
-# Slider Input
+## Slider Input
 
 You may use your mouse and the `Left/Right` directional keys on your keyboard to fine tune the numbers of the sliders in the `IRNAA` shinyApp.
 
-# Stopping IRNAA
+## Stopping IRNAA
 
 To stop `IRNAA`, close your Shell Terminal or Windows Command Prompt.
 
