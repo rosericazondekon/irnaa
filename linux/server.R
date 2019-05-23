@@ -1043,7 +1043,7 @@ server = function(input, output, session) {
 
     # output Pearson Correlation table
     output$DESeq2_pcorr <- renderDataTable({
-      round(cor(counts.sf_normalized, method = "pearson"),3)
+      round(cor(rlog.norm.counts, method = "pearson"),3)
     },options = list(scrollX = TRUE))
 
     output$DESeq2_pcorr_dld <- renderUI({
@@ -1051,7 +1051,7 @@ server = function(input, output, session) {
     })
 
     output$pcorr_mat <- renderPlotly({
-      heatmaply::heatmaply(as.matrix(cor(counts.sf_normalized, method = "pearson")))
+      heatmaply::heatmaply(as.matrix(cor(rlog.norm.counts, method = "pearson")))
     })
 
     # plot Hierarchical clustering tree
@@ -1074,7 +1074,7 @@ server = function(input, output, session) {
   output$DESeq2_pcorr_dld_btn <- downloadHandler(
     filename = "pairwiseCorr_results.csv",
     content = function(file){
-      write.csv(cor(counts.sf_normalized, method = "pearson"),file)
+      write.csv(cor(rlog.norm.counts, method = "pearson"),file)
     }
   )
   #########################################################
