@@ -1,2 +1,2 @@
 #!/bin/bash
-Rscript $IRNAAPATH/irnaa.R
+Rscript "$IRNAAPATH/irnaa.R"
