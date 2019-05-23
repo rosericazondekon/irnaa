@@ -129,7 +129,8 @@ Once the working directory is set, IRNAA automatically detects the samples and a
 IRNAA expects a reference transcriptome in the `.fa` or `.fna` format. Although IRNAA functions nominally with either RefSeq NCBI, or Ensembl transcriptome references (in FASTA format), we recommend the use of **RefSeq transcriptome reference FASTA file** available on the <a href="https://www.ncbi.nlm.nih.gov/genome" target="_blank">NCBI website</a>.
 
 ### Read Quantification
-For read quantification from FASTQ files, it is important to choose the correct reference source when importing Gene level estimates. By default, `IRNAA` provides gene annotation for Human, Mouse, and Zebrafish. When working with a different species, the species annotation database (e.g. `org.Bt.eg.db` for Bovine) can be specified and `IRNAA` will automatically install it and use it to import gene level estimates. A full list of the Genome wide annotation database packages is available on the <a href="https://bioconductor.org/packages/release/BiocViews.html#___AnnotationData" target="_blank">Bioconductor AnnotationData page</a>.
+For read quantification from FASTQ files, it is important to choose the correct reference source when importing Gene level estimates. For example, if you perform indexing with RefSeq transcriptome reference, you should choose 'RefSeq NCBI' as your reference source.
+By default, `IRNAA` provides gene annotation for Human, Mouse, and Zebrafish. When working with a different species, the species annotation database (e.g. `org.Bt.eg.db` for Bovine) can be specified and `IRNAA` will automatically install it and use it to import gene level estimates. A full list of the Genome wide annotation database packages is available on the <a href="https://bioconductor.org/packages/release/BiocViews.html#___AnnotationData" target="_blank">Bioconductor AnnotationData page</a>.
 
 <br/>
 Slider Input
