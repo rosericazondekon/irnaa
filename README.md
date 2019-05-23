@@ -25,7 +25,7 @@ Before installation, please, make sure the following tools are installed and can
 - <a href="https://combine-lab.github.io/salmon/" target="_blank">salmon</a> is a command line tool for quantifying the expression of transcripts using RNA-seq data.
 - <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">fastQC</a> is a quality control tool for high throughput sequence data built in Java.
 - <a href="https://multiqc.info/" target="_blank">multiQC</a> is a command line tool to Aggregate results from bioinformatics analyses across many samples into a single report. Here, `multiQC` is used to aggregate `fastQC` reports across many samples into a single report.
-- <a href="https://www.r-project.org/" target="_blank">R >= 3.5.1</a> is a free software environment for statistical computing and graphics.
+- <a href="https://www.r-project.org/" target="_blank">R</a> is a free software environment for statistical computing and graphics.
 
 Next, extract IRNAA to your local drive.
 
