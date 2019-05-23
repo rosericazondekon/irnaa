@@ -23,7 +23,7 @@ setDir <- function(session, input){
       if (input$directory > 0) {
         default <- readDirectoryInput(session, 'directory')
         path <- choose.dir(default)
-        
+
         # update the widget value
         updateDirectoryInput(session, 'directory', value = path)
       }
@@ -49,7 +49,7 @@ chooseFile <- function(){
 
 #Server side programming...
 server = function(input, output, session) {
-  
+
   # values <- reactiveValues()
   # setDir(session, input)
   searchURL <- "http://useast.ensembl.org/Multi/Search/Results?q="#"https://www.ncbi.nlm.nih.gov/gene/?term="
@@ -64,10 +64,10 @@ server = function(input, output, session) {
   conditions<-factor()
   results_dge <- list()
   edgeR_fit_mod <- list()
-  
+
   # Observe user interactions with Shiny Dashboard
   # observe({
-  
+
   #################################################
   ### Import read counts from file
   #################################################
@@ -92,7 +92,7 @@ server = function(input, output, session) {
         DT_output <- dat
         row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
         output$files_data <- renderDataTable({DT_output} ,options = list(scrollX = TRUE), escape = F)
-        
+
         setProgress(value = 4/5, detail = "Data UI rendering...")
         output$sel_conds <- renderUI({
           multiInput(
@@ -109,7 +109,7 @@ server = function(input, output, session) {
             )
           )
         })
-        
+
         output$set_cond <- renderUI({
           actionButton("set_cond_btn2", "Set conditions!")
         })
@@ -117,7 +117,7 @@ server = function(input, output, session) {
       }
     })
   })
-  
+
   output$counts_download <- downloadHandler(
     filename = paste0("read_",input$tb_select,".csv"),
     content = function(file){
@@ -126,18 +126,18 @@ server = function(input, output, session) {
       write.csv(down_table, file)
     }
   )
-  
+
   output$tr_counts <- renderPrint({
     import_transcript()
   })
-  
+
   output$table <- renderDataTable({
     t <- txi[[input$tb_select]]
     colnames(t) <- txi.header
     row.names(t) <- paste0('<a target="_blank" href="',searchURL,rownames(t),'">',rownames(t),'</a>')
     t
   },options = list(scrollX = TRUE), escape = F)
-  
+
   ######print_conds
   get_conds <- eventReactive(input$set_cond_btn,{
     vs <- list()
@@ -149,7 +149,7 @@ server = function(input, output, session) {
     })
     conditions
   })
-  
+
   get_conds2 <- eventReactive(input$set_cond_btn2,{
     vs <- list()
     for(s in txi.header){vs[[s]]<-"A"} #set condition "A" by default
@@ -161,15 +161,15 @@ server = function(input, output, session) {
     conditions
   })
   #######################################
-  
+
   output$print_conds <- renderPrint({
     get_conds()
   })
-  
+
   output$print_conds2 <- renderPrint({
     get_conds2()
   })
-  
+
   ##################################################
   ### When "Get DESeq2 dataset!" button is clicked
   #################################################
@@ -181,7 +181,7 @@ server = function(input, output, session) {
     # dds <- DESeq2::DESeqDataSetFromMatrix(txi, sampleTable, ~condition)
     dds <- dds[ rowSums(DESeq2::counts(dds)) > 0, ] # remove  genes  without  any  counts
     dds <<- dds
-    
+
     #Output DESeq2 dataset summary
     output$conditions_info <- renderPrint({head(SummarizedExperiment::colData(dds))})
     DT_output <- SummarizedExperiment::assay(dds)
@@ -192,18 +192,18 @@ server = function(input, output, session) {
     })
     output$library_size <- renderPrint(colSums(DESeq2::counts(dds)))
     output$library_counts <- renderPrint(colSums(txi$counts))
-    
+
     output$normalization <- renderUI({
       actionButton("normalization_btn", "Normalize dataset!")
     })
-    
+
     output$bar_counts <- renderPlotly({
       p <- plotly::plot_ly(y=matrixStats::colSums2(counts(dds)), x=names(colSums(counts(dds))), type="bar")
       p
     })
   }
   ### end of get_DESeq_data()
-  
+
   get_DESeq_data2 <- function(){
     library(magrittr)
     sampleTable <- data.frame(condition = conditions)
@@ -212,7 +212,7 @@ server = function(input, output, session) {
     dds <- DESeq2::DESeqDataSetFromMatrix(txi$counts, sampleTable, ~condition)
     dds <- dds[ rowSums(DESeq2::counts(dds)) > 0, ] # remove  genes  without  any  counts
     dds <<- dds
-    
+
     DT_output <- SummarizedExperiment::assay(dds)
     row.names(DT_output) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
     #Output DESeq2 dataset summary
@@ -223,39 +223,39 @@ server = function(input, output, session) {
     })
     output$library_size <- renderPrint(colSums(DESeq2::counts(dds)))
     output$library_counts <- renderPrint(colSums(txi$counts))
-    
+
     output$normalization <- renderUI({
       actionButton("normalization_btn", "Normalize dataset!")
     })
-    
+
     output$bar_counts <- renderPlotly({
       p <- plotly::plot_ly(y=matrixStats::colSums2(counts(dds)), x=names(colSums(counts(dds))), type="bar")
       p
     })
   }
   ### end of get_DESeq_data2()
-  
+
   output$assay_info_dld_btn <- downloadHandler(
     filename = "RawCounts.csv",
     content = function(file){write.csv(SummarizedExperiment::assay(dds),file)}
   )
-  
+
   #################################################
-  
+
   observeEvent(input$get_DESeq2_data_btn,{
     withProgress(message="Preprocessing DESeq2 dataset...",{
       get_DESeq_data()
     })
     # get_DESeq_data()
   })
-  
+
   observeEvent(input$get_DESeq2_data_btn2,{
     withProgress(message="Preprocessing DESeq2 dataset...",{
       get_DESeq_data2()
     })
     # get_DESeq_data2()
   })
-  
+
   ##################################################
   ### When "Get DESeq2 dataset!" button is clicked
   #################################################
@@ -276,25 +276,25 @@ server = function(input, output, session) {
     setProgress(value = 4/5, detail = "Count regularized log-normalization...")
     rlog.norm.counts  <<- SummarizedExperiment::assay(DESeq.rlog)
     dds <<- dds_norm
-    
+
     DT_out <- counts.sf_normalized
     row.names(DT_out) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_out),'">',rownames(DT_out),'</a>')
     output$norm_assay_info <- renderDataTable({round(DT_out,3)},options = list(scrollX = TRUE), escape = F)
     output$norm_assay_info_dld <- renderUI({
       downloadButton(outputId = "norm_assay_info_dld_btn",label = "Download Normalized RC data!")
     })
-    
+
     DT_out2 <- log.norm.counts
     row.names(DT_out2) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_out2),'">',rownames(DT_out2),'</a>')
     output$lnorm_assay_info <- renderDataTable({round(DT_out2,3)},options = list(scrollX = TRUE), escape = F)
     output$lnorm_assay_info_dld <- renderUI({
       downloadButton(outputId = "lnorm_assay_info_dld_btn",label = "Download log2-transformed RC!")
     })
-    
+
     DT_out3 <- rlog.norm.counts
     row.names(DT_out3) <- paste0('<a target="_blank" href="',searchURL,rownames(DT_out3),'">',rownames(DT_out3),'</a>')
     output$rlnorm_assay_info <- renderDataTable({round(DT_out3,3)},options = list(scrollX = TRUE), escape = F)
-    
+
     output$rlnorm_assay_info_dld <- renderUI({
       downloadButton(outputId = "rlnorm_assay_info_dld_btn",label = "Download rlog2-transformed RC!")
     })
@@ -329,22 +329,22 @@ server = function(input, output, session) {
         ggtitle("rlog -transformed  read  counts after variance shrinkage") +
         ylab("standard  deviation")
     })
-    
+
     output$global_rc <- renderUI({
       actionButton("global_rc_btn", "Explore global read counts!")
     })
-    
+
     output$clust_method <- renderUI({
       selectInput("hclust_method", "Choose clustering method:"
-                  ,c("complete","ward.D", "ward.D2", "single","average","mcquitty","median","centroid"), 
+                  ,c("complete","ward.D", "ward.D2", "single","average","mcquitty","median","centroid"),
                   selected = "complete", multiple = FALSE,
                   selectize = TRUE, width = "200px", size = NULL)
     })
-    
+
     output$DESeq2_runDGE <- renderUI({
       actionButton("DESeq2_runDGE_btn", "Run DESeq2 DGE Analysis!")
     })
-    
+
     output$edgeR_runDGE <- renderUI({
       actionButton("edgeR_runDGE_btn", "Run edgeR DGE Analysis!")
     })
@@ -354,28 +354,28 @@ server = function(input, output, session) {
                   ,selected = "glmFit", multiple = FALSE,
                   selectize = TRUE, width = NULL, size = NULL)
     })
-    
+
     output$limma_runDGE <- renderUI({
       actionButton("limma_runDGE_btn", "Run limma DGE Analysis!")
     })
     setProgress(value = 1, detail = "Done!")
   }
   ###################### end of norm_DESeq_data ######################
-  
+
   output$norm_assay_info_dld_btn <- downloadHandler(
     filename = "NormalizedRawCounts.csv",
     content = function(file){
       write.csv(counts.sf_normalized,file)
     }
   )
-  
+
   output$lnorm_assay_info_dld_btn <- downloadHandler(
     filename = "logTransfNormRawCounts.csv",
     content = function(file){
       write.csv(log.norm.counts,file)
     }
   )
-  
+
   output$rlnorm_assay_info_dld_btn <- downloadHandler(
     filename = "reglogTransfNormRawCounts.csv",
     content = function(file){
@@ -383,15 +383,15 @@ server = function(input, output, session) {
     }
   )
   #################################################
-  
+
   observeEvent(input$normalization_btn,{
     withProgress(message = "Data Normalization in progress... please wait!",{
       norm_DESeq_data()
     })
     # norm_DESeq_data()
   })
-  
-  
+
+
   ##########################################################
   ### When "Explore global read counts!" button is clicked
   #########################################################
@@ -401,20 +401,20 @@ server = function(input, output, session) {
     distance.m_rlog  <- as.dist(1 - cor(rlog.norm.counts , method = "pearson" ))
     setProgress(value = 2/4, detail = "Principal Components Analysis...")
     pc <- prcomp(t(rlog.norm.counts))
-    
+
     # output Pearson Correlation table
     output$DESeq2_pcorr <- renderDataTable({
-      round(cor(counts.sf_normalized, method = "pearson"),3)
+      round(cor(rlog.norm.counts, method = "pearson"),3)
     },options = list(scrollX = TRUE))
-    
+
     output$DESeq2_pcorr_dld <- renderUI({
       downloadButton("DESeq2_pcorr_dld_btn", "Download Correlation data!")
     })
-    
+
     output$pcorr_mat <- renderPlotly({
-      heatmaply::heatmaply(as.matrix(cor(counts.sf_normalized, method = "pearson")))
+      heatmaply::heatmaply(as.matrix(cor(rlog.norm.counts, method = "pearson")))
     })
-    
+
     # plot Hierarchical clustering tree
     setProgress(value = 3/4, detail = "Hierarchical clustering tree...")
     output$DESeq2_hr_tree <- renderPlot(
@@ -422,7 +422,7 @@ server = function(input, output, session) {
            ,ann=FALSE
            ,main = "rlog  transformed  read  counts\ndistance: Pearson  correlation")
     )
-    
+
     # plot PCA
     output$DESeq2_pca <- renderPlotly({
       P <- plotPCA2(pc,colorby=conditions, title="Rlog  transformed  counts")
@@ -431,22 +431,22 @@ server = function(input, output, session) {
     setProgress(value = 1, detail = "Done!")
   }
   ############# end of global_rc_process() ###############
-  
+
   output$DESeq2_pcorr_dld_btn <- downloadHandler(
     filename = "pairwiseCorr_results.csv",
     content = function(file){
-      write.csv(cor(counts.sf_normalized, method = "pearson"),file)
+      write.csv(cor(rlog.norm.counts, method = "pearson"),file)
     }
   )
   #########################################################
-  
+
   observeEvent(input$global_rc_btn,{
     withProgress(message = "Processing in progress.. Please wait!",{
       global_rc_process()
     })
     # global_rc_process()
   })
-  
+
   ##########################################################
   ### When "Run DESeq2 DGE Analysis!" button is clicked
   #########################################################
@@ -454,22 +454,22 @@ server = function(input, output, session) {
     withProgress(message = "Performing DGE Analysis with DESeq2... Please wait!", value = 0,{
       n <- 16
       SummarizedExperiment::colData(dds)$condition <- relevel(SummarizedExperiment::colData(dds)$condition , "A")
-      setProgress(value = 4/n, #message = "Fitting model, please wait...", 
+      setProgress(value = 4/n, #message = "Fitting model, please wait...",
                   detail = "Sequencing  depth  normalization between  the  samples...")
       # dds2 <- DESeq(dds)
       # sequencing  depth  normalization between  the  samples
       dds2 <- DESeq2::estimateSizeFactors(dds)
-      
-      setProgress(value = 6/n, #message = "Fitting model, please wait...", 
+
+      setProgress(value = 6/n, #message = "Fitting model, please wait...",
                   detail = "Gene-wise dispersion  estimates across  all  samples...")
       # gene -wise  dispersion  estimates across  all  samples
       dds2 <- DESeq2::estimateDispersions(dds2)
-      
-      setProgress(value = 9/n, #message = "Fitting model, please wait...", 
+
+      setProgress(value = 9/n, #message = "Fitting model, please wait...",
                   detail = "Fitting a negative  binomial  GLM...")
       # this  fits a negative  binomial  GLM and applies  Wald  statistics  to each  gene
       dds2 <- DESeq2::nbinomWaldTest(dds2)
-      
+
       setProgress(value = 10/n, detail = "Results filtering...")
       DGE.results  <- DESeq2::results(dds2, independentFiltering = TRUE , alpha = 0.05)
       # extract  the  normalized  read  counts  for DE genes  into a matrix
@@ -477,23 +477,23 @@ server = function(input, output, session) {
       output$DESeq2_pvalues <- renderPlot(
         hist(DGE.results$pvalue, col = "grey", border = "white", xlab = "", ylab = "", main = "frequencies  of p-values")
       )
-      
+
       output$DESeq2_sumout <- renderPrint({
         summary(dds2)
       })
-      
+
       setProgress(value = 12/n, detail = "MA plot processing...")
       output$DESeq2_plotMA <-renderPlot(
         DESeq2::plotMA(DGE.results , alpha = 0.05,  main = "A vs. B conditions", ylim = c(-4,4))
       )
-      
+
       setProgress(value = 13/n, detail = "Volcano plot processing...")
       DGE_data <<- as.data.frame(DGE.results)
-      
+
       results_dge[["DESeq2"]] <<- DGE_data
-      
+
       d_choices <- colnames(DGE.results)
-      
+
       output$DESeq2_volcano <- renderPlot({
         apval<-input$DESeq2_vp_pval
         lfc<-input$DESeq2_vp_lfc
@@ -503,20 +503,20 @@ server = function(input, output, session) {
         with(subset(DGE_data, padj<apval ), points(log2FoldChange, -log10(pvalue), pch=20, col="blue"))
         with(subset(DGE_data, padj<apval & abs(log2FoldChange)>lfc), points(log2FoldChange, -log10(pvalue), pch=20, col="red"))
       })
-      
+
       setProgress(value = 14/n, detail = "Table rendering...")
       DT_output<-DGE_data
       feature <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
       row.names(DT_output)<-feature
-      
+
       output$DESeq2_dge_res <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
-      
+
       output$DESeq2_dge_res_dld <- renderUI({
         downloadButton(outputId = "DESeq2_dge_download",label = "Download DGE results Data!")
       })
-      
+
       output$DESeq2_dge_res2 <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
-      
+
       setProgress(value = 15/n, detail = "UI rendering...")
       output$filterGenes <- renderUI({
         tagList(fluidRow(column(5
@@ -573,13 +573,13 @@ server = function(input, output, session) {
         ,verbatimTextOutput("filt_genes")
         )
       })
-      
+
       output$DESeq2_gprofile_par <- renderUI({
         tagList(
           fluidRow(hr(),
                    column(5,selectInput("gp_organism", "Choose organism"
                                         ,list("Homo sapiens"="hsapiens", "Mus musculus"="mmusculus", "Gorilla gorilla"="ggorilla"
-                                              ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"), 
+                                              ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"),
                                         selected = "hsapiens", multiple = FALSE,
                                         selectize = TRUE, width = "200px", size = NULL)
                           ,conditionalPanel(
@@ -589,15 +589,15 @@ server = function(input, output, session) {
                    )
                    ,column(5,selectInput("correction_method", "Correction method"
                                          ,list("Analytical"="analytical", "gSCS"="gSCS", "fdr"="fdr"
-                                               ,"bonferroni"="bonferroni"), 
+                                               ,"bonferroni"="bonferroni"),
                                          selected = "fdr", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5,selectInput("hier_filtering", "Hierarchical filtering strength"
-                                         ,list("None"="none", "Moderate"="moderate", "Strong"="strong"), 
+                                         ,list("None"="none", "Moderate"="moderate", "Strong"="strong"),
                                          selected = "none", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5,selectInput("domain_size", "Statistical domain size"
-                                         ,list("Annotated"="annotated", "Known"="known"), 
+                                         ,list("Annotated"="annotated", "Known"="known"),
                                          selected = "annotated", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5, materialSwitch("sort_by_structure","Sort by structure",value=T
@@ -616,7 +616,7 @@ server = function(input, output, session) {
           ,uiOutput("gprofile_res_dld")
         )
       })
-      
+
       output$DESeq2_settings <- renderUI({
         tagList(
           selectInput("DESeq2_sort_by","Sort by:", d_choices, selected="padj",width = "200px")
@@ -690,14 +690,14 @@ server = function(input, output, session) {
     })
   })
   ##################################################################################################################
-  
+
   output$DESeq2_dge_download <- downloadHandler(
     filename = "DESeq2_DGE_results.csv",
     content = function(file){
       write.csv(DGE_data,file)
     }
   )
-  
+
   observeEvent(input$d_filter,{
     if(input$DESeq2_sort_by=="log2FoldChange"){
       lfc <- eval(parse(text = paste0("input$d_",input$DESeq2_sort_by)))
@@ -747,13 +747,13 @@ server = function(input, output, session) {
       list("DGE"=paste(length(DGEgenes_DESeq2),"differentially expressed features"),"Differentially Expressed Features"=DGEgenes_DESeq2)
     })
   })
-  
+
   observeEvent(input$d_heatmap,{
     # extract  the  normalized  read  counts  for DE genes  into a matrix
     hm.mat_DGEgenes  <- log.norm.counts[DGEgenes_DESeq2, ]
     output$DESeq2_heatmap <- renderPlotly({
       withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Features", 
+        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes), xlab = "Samples", ylab = "Features",
                                      scale = "row", row_dend_left = input$d_rdl, plot_method = input$d_plot_method, dendrogram=input$d_dendogram,
                                      Rowv = input$d_Rowv, Colv = input$d_Colv, #distfun = input$d_distfun, #hclustfun = "average",
                                      colorbar=input$d_colorbar, dist_method = input$d_dist_method, hclust_method = input$d_hclust_method,
@@ -763,9 +763,9 @@ server = function(input, output, session) {
       })
     })
   })
-  
+
   ######################################
-  
+
   observeEvent(input$filt_genes_btn,{
     output$filt_genes <- renderPrint({
       if(input$gprof_select=="log2FoldChange"){
@@ -774,7 +774,7 @@ server = function(input, output, session) {
                                              eval(parse(text = paste0("input$gp_",input$gprof_select)))))
       }else{
         gprofile_genes <<- rownames(subset(DGE_data
-                                           ,eval(parse(text = input$gprof_select)) <= eval(parse(text = paste0("input$gp_",input$gprof_select)))[2] & 
+                                           ,eval(parse(text = input$gprof_select)) <= eval(parse(text = paste0("input$gp_",input$gprof_select)))[2] &
                                              eval(parse(text = input$gprof_select)) >= eval(parse(text = paste0("input$gp_",input$gprof_select)))[1]))
       }
       if(any(startsWith(as.character(gprofile_genes),"ENS"))==T)
@@ -785,7 +785,7 @@ server = function(input, output, session) {
     })
     output$perf_gprof_btn <- renderUI(actionButton("gprofile_btn","Perform gProfile pathway Analysis!"))
   })
-  
+
   #########################################################
   observeEvent(input$gprofile_btn,{
     withProgress(message = "Gene Pathway analysis in progress...",{
@@ -810,7 +810,7 @@ server = function(input, output, session) {
                                   ,"&significance_threshold_method=",input$correction_method#"&threshold_algo=",input$correction_method
                      )
                      ,target="_blank")
-      
+
       setProgress(value = 4/6, detail = "WebGestalt link generation...")
       wgst_url <- a("Click me to be directed to WebGestalt Website!"
                     ,href=paste0("http://www.webgestalt.org/option.php",'?gene_list=',query,'&organism=',gpr_organism
@@ -821,15 +821,15 @@ server = function(input, output, session) {
                     ,target="_blank")
       setProgress(value = 5/6, detail = "gProfiler Table rendering...")
       output$gprofile_table <- renderDataTable({gprof_table},options = list(scrollX = TRUE))
-      
+
       output$gprofileLink <- renderUI({
         tagList("gprofile Link:", gprof_url)
       })
-      
+
       output$webgestaltLink <- renderUI({
         tagList("WebGestalt Link:", wgst_url)
       })
-      
+
       output$gprofile_res_dld<-renderUI({
         downloadButton(outputId = "gprofiler_download",label = "Download gProfile results!")
       })
@@ -837,7 +837,7 @@ server = function(input, output, session) {
     })
   })
   #########################################################
-  
+
   output$gprofiler_download <- downloadHandler(
     filename = "gProfileR_results.csv",
     content = function(file){
@@ -845,7 +845,7 @@ server = function(input, output, session) {
                 file)
     }
   )
-  
+
   ##########################################################
   ### When "Run limma DGE Analysis!" button is clicked
   #########################################################
@@ -854,7 +854,7 @@ server = function(input, output, session) {
       output$limma_sumout <-renderUI({
         withSpinner(verbatimTextOutput("limma_DGE_results_sum"),size=1,proxy.height=200,type=sample(c(1,4,5:8),1))
       })
-      
+
       sample_info.edger <- relevel(conditions , ref = "A")
       # limma  also  needs a design  matrix , just  like  edgeR
       design  <- model.matrix(~sample_info.edger)
@@ -866,50 +866,50 @@ server = function(input, output, session) {
       edgeR.DGElist <- edgeR::DGEList(counts = txi$counts , group = sample_info.edger)
       edgeR.DGElist <- edgeR::calcNormFactors(edgeR.DGElist , method = "TMM")
       rownames(design) <- colnames(edgeR.DGElist)
-      
+
       setProgress(value = 1/8, detail = "Transform count data to log2-counts per million...")
       voomTransformed  <- limma::voom(edgeR.DGElist , design , plot=F)
-      
+
       # fit a linear  model  for  each  gene
       setProgress(value = 3/8, detail = "Fit a linear  model  for  each  gene...")
       voomed.fitted  <- limma::lmFit(voomTransformed , design = design)
-      
+
       output$limma_DGE_results_sum <- renderPrint({
         summary(voomed.fitted)
       })
-      
+
       # compute  moderated t-statistics , moderated F-statistics ,
       # and log -odds of  differential  expression
       setProgress(value = 4/11, detail = "Computing statistics for differential expression...")
       voomed.fitted  <- limma::eBayes(voomed.fitted)
-      
+
       # extract  gene  list  with  logFC  and  statistical  measures
       colnames(design) # check  how  the  coefficient  is named
-      
+
       setProgress(value = 5/8, detail = "Extracting gene list...")
       DGE.results_limma  <<- limma::topTable(voomed.fitted , coef = "sample_info.edgerB",
                                              number = Inf , adjust.method = "BH",
                                              sort.by = "logFC")
-      
+
       results_dge[["limma"]] <<- DGE.results_limma
-      
+
       setProgress(value = 6/8, detail = "Rendering results table...")
       DT_output <- DGE.results_limma
       feature <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
       row.names(DT_output)<-feature
-      
+
       output$limma_dge_res <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
       output$limma_dge_res2 <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
-      
+
       setProgress(value = 7/8, detail = "UI rendering...")
       output$limma_pvalues <- renderPlot(
         hist(DGE.results_limma$P.Value, col = "grey", border = "white", xlab = "", ylab = "", main = "frequencies  of p-values")
       )
-      
+
       output$limma_plotMA <-renderPlot(
         limma::plotMA(DGE.results_limma , alpha = 0.05,  main = "A vs. B conditions")
       )
-      
+
       output$limma_volcano <- renderPlot({
         apval<-input$limma_vp_pval
         lfc<-input$limma_vp_lfc
@@ -919,13 +919,13 @@ server = function(input, output, session) {
         with(subset(DGE.results_limma, adj.P.Val<apval ), points(logFC, -log10(adj.P.Val), pch=20, col="blue"))
         with(subset(DGE.results_limma, adj.P.Val<apval & abs(logFC)>lfc), points(logFC, -log10(adj.P.Val), pch=20, col="red"))
       })
-      
+
       output$limma_dge_res_dld <- renderUI({
         downloadButton(outputId = "limma_dge_download",label = "Download limma DGE results!")
       })
-      
+
       l_choices <- colnames(DGE.results_limma)
-      
+
       output$limma_settings <- renderUI({
         tagList(
           selectInput("limma_sort_by","Sort by:", l_choices, selected="adj.P.Val",width = "200px")
@@ -995,11 +995,11 @@ server = function(input, output, session) {
           ,hr()
         )
       })
-      
+
       ##############################limma_filter_genes(on limma_gprofile)
       output$limma_filterGenes <- renderUI({
         tagList(fluidRow(column(5
-                                ,selectInput("limma_gprof_select", "Filter features by:",colnames(DGE.results_limma), 
+                                ,selectInput("limma_gprof_select", "Filter features by:",colnames(DGE.results_limma),
                                              selected = "logFC", multiple = FALSE,
                                              selectize = TRUE, width = "200px", size = NULL))
                          ,column(5
@@ -1054,14 +1054,14 @@ server = function(input, output, session) {
         )
       })
       #############################
-      
-      
+
+
       output$limma_gprofile_par <- renderUI({
         tagList(
           fluidRow(hr(),
                    column(5,selectInput("lgp_organism", "Choose organism"
                                         ,list("Homo sapiens"="hsapiens", "Mus musculus"="mmusculus", "Gorilla gorilla"="ggorilla"
-                                              ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"), 
+                                              ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"),
                                         selected = "hsapiens", multiple = FALSE,
                                         selectize = TRUE, width = "200px", size = NULL)
                           ,conditionalPanel(
@@ -1071,15 +1071,15 @@ server = function(input, output, session) {
                    )
                    ,column(5,selectInput("l_correction_method", "Correction method"
                                          ,list("Analytical"="analytical", "gSCS"="gSCS", "fdr"="fdr"
-                                               ,"bonferroni"="bonferroni"), 
+                                               ,"bonferroni"="bonferroni"),
                                          selected = "fdr", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5,selectInput("l_hier_filtering", "Hierarchical filtering strength"
-                                         ,list("None"="none", "Moderate"="moderate", "Strong"="strong"), 
+                                         ,list("None"="none", "Moderate"="moderate", "Strong"="strong"),
                                          selected = "none", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5,selectInput("l_domain_size", "Statistical domain size"
-                                         ,list("Annotated"="annotated", "Known"="known"), 
+                                         ,list("Annotated"="annotated", "Known"="known"),
                                          selected = "annotated", multiple = FALSE,
                                          selectize = TRUE, width = "200px", size = NULL))
                    ,column(5, materialSwitch("l_sort_by_structure","Sort by structure",value=T
@@ -1098,19 +1098,19 @@ server = function(input, output, session) {
           ,uiOutput("l_gprofile_res_dld")
         )
       })
-      
+
       setProgress(value = 1, detail = "Done!")
     })
   })
   ##################################################################################################################
-  
+
   output$limma_dge_download <- downloadHandler(
     filename = "limma_DGE_results.csv",
     content = function(file){
       write.csv(DGE.results_limma, file)
     }
   )
-  
+
   observeEvent(input$l_filter,{
     if(input$limma_sort_by=="logFC"){
       lfc <- eval(parse(text = paste0("input$s_",input$limma_sort_by)))
@@ -1160,13 +1160,13 @@ server = function(input, output, session) {
       list("DGE"=paste(length(DGEgenes_lima),"differentially expressed features"),"Differentially Expressed Features"=DGEgenes_lima)
     })
   })
-  
+
   observeEvent(input$l_heatmap,{
     # extract  the  normalized  read  counts  for DE genes  into a matrix
     hm.mat_DGEgenes.lima  <- log.norm.counts[DGEgenes_lima, ]
     output$limma_heatmap <- renderPlotly({
       withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Features", 
+        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.lima), xlab = "Samples", ylab = "Features",
                                      scale = "row", row_dend_left = input$l_rdl, plot_method = input$l_plot_method, dendrogram=input$l_dendogram,
                                      Rowv = input$l_Rowv, Colv = input$l_Colv, #distfun = input$l_distfun, #hclustfun = "average",
                                      colorbar=input$l_colorbar, dist_method = input$l_dist_method, hclust_method = input$l_hclust_method,
@@ -1177,14 +1177,14 @@ server = function(input, output, session) {
     })
   })
   ##################################################################################################################
-  
+
   output$gprofiler_download <- downloadHandler(
     filename = "gProfileR_results.csv",
     content = function(file){
       write.csv(gprof_table, file)
     }
   )
-  
+
   ##################################################################################################################
   observeEvent(input$limma_filt_genes_btn,{
     output$limma_filt_genes <- renderPrint({
@@ -1194,7 +1194,7 @@ server = function(input, output, session) {
                                                    eval(parse(text = paste0("input$limma_gp_",input$limma_gprof_select)))))
       }else{
         limma_gprofile_genes <<- rownames(subset(DGE.results_limma
-                                                 ,eval(parse(text = input$limma_gprof_select)) <= eval(parse(text = paste0("input$limma_gp_",input$limma_gprof_select)))[2] & 
+                                                 ,eval(parse(text = input$limma_gprof_select)) <= eval(parse(text = paste0("input$limma_gp_",input$limma_gprof_select)))[2] &
                                                    eval(parse(text = input$limma_gprof_select)) >= eval(parse(text = paste0("input$limma_gp_",input$limma_gprof_select)))[1]))
       }
       if(any(startsWith(as.character(limma_gprofile_genes),"ENS"))==T)
@@ -1205,7 +1205,7 @@ server = function(input, output, session) {
     })
     output$l_perf_gprof_btn <- renderUI(actionButton("limma_gprofile_btn","Perform gProfile pathway Analysis!"))
   })
-  
+
   #########################################################
   observeEvent(input$limma_gprofile_btn,{
     withProgress(message = "Gene Pathway analysis in progress...",{
@@ -1230,7 +1230,7 @@ server = function(input, output, session) {
                                   ,"&significance_threshold_method=",input$l_correction_method#"&threshold_algo=",input$l_correction_method
                      )
                      ,target="_blank")
-      
+
       setProgress(value = 4/6, detail = "WebGestalt link generation...")
       wgst_url <- a("Click me to be directed to WebGestalt Website!"
                     ,href=paste0("http://www.webgestalt.org/option.php",'?gene_list=',query,'&organism=',lgpr_organism
@@ -1241,15 +1241,15 @@ server = function(input, output, session) {
                     ,target="_blank")
       setProgress(value = 5/6, detail = "gProfiler Table rendering...")
       output$l_gprofile_table <- renderDataTable({limma_gprof_table},options = list(scrollX = TRUE))
-      
+
       output$l_gprofileLink <- renderUI({
         tagList("gprofile Link:", gprof_url)
       })
-      
+
       output$l_webgestaltLink <- renderUI({
         tagList("WebGestalt Link:", wgst_url)
       })
-      
+
       output$l_gprofile_res_dld<-renderUI({
         downloadButton(outputId = "limma_gprofiler_download",label = "Download gProfile results!")
       })
@@ -1257,15 +1257,15 @@ server = function(input, output, session) {
     })
   })
   #########################################################
-  
+
   output$limma_gprofiler_download <- downloadHandler(
     filename = "gProfileR_results.csv",
     content = function(file){
       write.csv(limma_gprof_table, file)
     }
   )
-  
-  
+
+
   ##########################################################
   ### When "Run edgeR DGE Analysis!" button is clicked
   #########################################################
@@ -1311,41 +1311,41 @@ server = function(input, output, session) {
         edgeR_fit_mod[["glmQLFit"]] <<- DGE.results_edgeR
         results_dge[["edgeR_QL"]] <<- DGE.results_edgeR
       }
-      
+
       setProgress(value = 10/n, detail = "Rendering DGE results table...")
       output$edgeR_DGE_results_sum <- renderPrint({
         summary(edger_fit)
       })
-      
+
       output$edgeR_type2 <- renderUI({
         selectInput("edgeR_type_sel", "Select an edgeR results data", names(edgeR_fit_mod)
                     ,selected = names(DGE.results_edgeR)[1]
                     ,multiple = FALSE
                     ,selectize = TRUE, width = NULL, size = NULL)
       })
-      
+
       output$edgeR_getData <- renderUI({
         actionButton("edgeR_getData_btn","Get edgeR data results!")
       })
-      
+
       DT_output <- DGE.results_edgeR
       feature <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
       row.names(DT_output) <- feature
       # DT_output$Feature <- feature
-      
+
       output$edgeR_dge_res <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
       #output$edgeR_dge_res2 <- renderDataTable({DGE.results_edgeR},options = list(scrollX = TRUE))
-      
+
       output$edgeR_pvalues <- renderPlot(
         hist(DGE.results_edgeR$PValue, col = "grey", border = "white", xlab = "", ylab = "", main = "frequencies  of p-values")
       )
-      
+
       setProgress(value = 11/n, detail = "UI rendering...")
       output$edgeR_sumout <- renderUI({
         # plotMDS()
         withSpinner(verbatimTextOutput("edgeR_DGE_results_sum"), size=1, proxy.height=200, type = sample(c(1,4,5:8),1))
       })
-      
+
       output$edgeR_volcano <- renderPlot({
         apval<-input$edgeR_vp_pval
         lfc<-input$edgeR_vp_lfc
@@ -1355,17 +1355,17 @@ server = function(input, output, session) {
         with(subset(DGE.results_edgeR, FDR<apval ), points(logFC, -log10(FDR), pch=20, col="blue"))
         with(subset(DGE.results_edgeR, FDR<apval & abs(logFC)>lfc), points(logFC, -log10(FDR), pch=20, col="red"))
       })
-      
+
       output$edgeR_plotMA <-renderPlot({
         edgeR::plotBCV(edgeR.DGElist, main="Biological Coefficient of Variation")
       })
-      
+
       output$edgeR_dge_res_dld <- renderUI({
         downloadButton(outputId = "edgeR_dge_download",label = "Download limma DGE results!")
       })
-      
+
       e_choices <- colnames(DGE.results_edgeR)
-      
+
       output$edgeR_settings <- renderUI({
         tagList(
           selectInput("edgeR_sort_by","Sort by:", e_choices, selected="FDR",width = "200px")
@@ -1443,17 +1443,17 @@ server = function(input, output, session) {
     })
   })
   ##################################################################################################################
-  
+
   observeEvent(input$edgeR_getData_btn,{
     DT_output<-edgeR_fit_mod[[input$edgeR_type_sel]]
     feature <- paste0('<a target="_blank" href="',searchURL,rownames(DT_output),'">',rownames(DT_output),'</a>')
     row.names(DT_output) <- feature
     output$edgeR_dge_res2 <- renderDataTable({DT_output},options = list(scrollX = TRUE), escape = F)
-    
+
     output$edgeR_filterGenes <- renderUI({
       edgeR_data <- as.data.frame(edgeR_fit_mod[[input$edgeR_type_sel]])
       tagList(fluidRow(column(5
-                              ,selectInput("edgeR_gprof_select", "Filter features by:",colnames(DGE.results_edgeR), 
+                              ,selectInput("edgeR_gprof_select", "Filter features by:",colnames(DGE.results_edgeR),
                                            selected = "logFC", multiple = FALSE,
                                            selectize = TRUE, width = "200px", size = NULL))
                        ,column(5
@@ -1508,13 +1508,13 @@ server = function(input, output, session) {
       ,verbatimTextOutput("edgeR_filt_genes")
       )
     })
-    
+
     output$edgeR_gprofile_par <- renderUI({
       tagList(
         fluidRow(hr(),
                  column(5,selectInput("egp_organism", "Choose organism"
                                       ,list("Homo sapiens"="hsapiens", "Mus musculus"="mmusculus", "Gorilla gorilla"="ggorilla"
-                                            ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"), 
+                                            ,"Bonobo"="ppaniscus", "Ovis aries"="oaries","Other"="other"),
                                       selected = "hsapiens", multiple = FALSE,
                                       selectize = TRUE, width = "200px", size = NULL)
                         ,conditionalPanel(
@@ -1524,15 +1524,15 @@ server = function(input, output, session) {
                  )
                  ,column(5,selectInput("e_correction_method", "Correction method"
                                        ,list("Analytical"="analytical", "gSCS"="gSCS", "fdr"="fdr"
-                                             ,"bonferroni"="bonferroni"), 
+                                             ,"bonferroni"="bonferroni"),
                                        selected = "fdr", multiple = FALSE,
                                        selectize = TRUE, width = "200px", size = NULL))
                  ,column(5,selectInput("e_hier_filtering", "Hierarchical filtering strength"
-                                       ,list("None"="none", "Moderate"="moderate", "Strong"="strong"), 
+                                       ,list("None"="none", "Moderate"="moderate", "Strong"="strong"),
                                        selected = "none", multiple = FALSE,
                                        selectize = TRUE, width = "200px", size = NULL))
                  ,column(5,selectInput("e_domain_size", "Statistical domain size"
-                                       ,list("Annotated"="annotated", "Known"="known"), 
+                                       ,list("Annotated"="annotated", "Known"="known"),
                                        selected = "annotated", multiple = FALSE,
                                        selectize = TRUE, width = "200px", size = NULL))
                  ,column(5, materialSwitch("e_sort_by_structure","Sort by structure",value=T
@@ -1552,14 +1552,14 @@ server = function(input, output, session) {
       )
     })
   })
-  
+
   output$edgeR_dge_download <- downloadHandler(
     filename = "edgeR_DGE_results.csv",
     content = function(file){
       write.csv(DGE.results_edgeR, file)
     }
   )
-  
+
   observeEvent(input$e_filter,{
     if(input$edgeR_sort_by=="logFC"){
       lfc <- eval(parse(text = paste0("input$e_",input$edgeR_sort_by)))
@@ -1607,14 +1607,14 @@ server = function(input, output, session) {
       list("DGE"=paste(length(DGEgenes_edgeR),"differentially expressed features"),"Differentially Expressed Features"=DGEgenes_edgeR)
     })
   })
-  
+
   observeEvent(input$e_heatmap,{
-    
+
     # extract  the  normalized  read  counts  for DE genes  into a matrix
     hm.mat_DGEgenes.edgeR  <- log.norm.counts[DGEgenes_edgeR, ]
     output$edgeR_heatmap <- renderPlotly({
       withProgress(message = "Generating heatmap...Please wait!", value = 0.8,{
-        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Features", 
+        isolate(heatmaply::heatmaply(as.matrix(hm.mat_DGEgenes.edgeR), xlab = "Samples", ylab = "Features",
                                      scale = "row", row_dend_left = input$e_rdl, plot_method = input$e_plot_method, dendrogram=input$e_dendogram,
                                      Rowv = input$e_Rowv, Colv = input$e_Colv, #distfun = input$e_distfun, #hclustfun = "average",
                                      colorbar=input$e_colorbar, dist_method = input$e_dist_method, hclust_method = input$e_hclust_method,
@@ -1624,17 +1624,17 @@ server = function(input, output, session) {
       })
     })
   })
-  
+
   ##################################################################################################################
   observeEvent(input$edgeR_filt_genes_btn,{
     output$edgeR_filt_genes <- renderPrint({
       if(input$edgeR_gprof_select=="logFC"){
         edgeR_gprofile_genes <<- rownames(subset(as.data.frame(edgeR_fit_mod[[input$edgeR_type_sel]])
-                                                 ,abs(eval(parse(text = input$edgeR_gprof_select))) > 
+                                                 ,abs(eval(parse(text = input$edgeR_gprof_select))) >
                                                    eval(parse(text = paste0("input$edgeR_gp_",input$edgeR_gprof_select)))))
       }else{
         edgeR_gprofile_genes <<- rownames(subset(as.data.frame(edgeR_fit_mod[[input$edgeR_type_sel]])
-                                                 ,eval(parse(text = input$edgeR_gprof_select)) <= eval(parse(text = paste0("input$edgeR_gp_",input$edgeR_gprof_select)))[2] & 
+                                                 ,eval(parse(text = input$edgeR_gprof_select)) <= eval(parse(text = paste0("input$edgeR_gp_",input$edgeR_gprof_select)))[2] &
                                                    eval(parse(text = input$edgeR_gprof_select)) >= eval(parse(text = paste0("input$edgeR_gp_",input$edgeR_gprof_select)))[1]))
       }
       if(any(startsWith(as.character(edgeR_gprofile_genes),"ENS"))==T)
@@ -1645,7 +1645,7 @@ server = function(input, output, session) {
     })
     output$e_perf_gprof_btn <- renderUI(actionButton("edgeR_gprofile_btn","Perform gProfile pathway Analysis!"))
   })
-  
+
   #########################################################
   observeEvent(input$edgeR_gprofile_btn,{
     withProgress(message = "Gene Pathway analysis in progress...",{
@@ -1670,7 +1670,7 @@ server = function(input, output, session) {
                                   ,"&significance_threshold_method=",input$e_correction_method#"&threshold_algo=",input$e_correction_method
                      )
                      ,target="_blank")
-      
+
       setProgress(value = 4/6, detail = "WebGestalt link generation...")
       wgst_url <- a("Click me to be directed to WebGestalt Website!"
                     ,href=paste0("http://www.webgestalt.org/option.php",'?gene_list=',query,'&organism=',egpr_organism
@@ -1681,15 +1681,15 @@ server = function(input, output, session) {
                     ,target="_blank")
       setProgress(value = 5/6, detail = "gProfiler Table rendering...")
       output$e_gprofile_table <- renderDataTable({edgeR_gprof_table},options = list(scrollX = TRUE))
-      
+
       output$e_gprofileLink <- renderUI({
         tagList("gprofile Link:", gprof_url)
       })
-      
+
       output$e_webgestaltLink <- renderUI({
         tagList("WebGestalt Link:", wgst_url)
       })
-      
+
       output$e_gprofile_res_dld<-renderUI({
         downloadButton(outputId = "edgeR_gprofiler_download",label = "Download gProfile results!")
       })
@@ -1697,14 +1697,14 @@ server = function(input, output, session) {
     })
   })
   #########################################################
-  
+
   output$edgeR_gprofiler_download <- downloadHandler(
     filename = "gProfileR_results.csv",
     content = function(file){
       write.csv(edgeR_gprof_table, file)
     }
   )
-  
+
   ########################################################
   # VENN DIAGRAM
   ########################################################
@@ -1718,7 +1718,7 @@ server = function(input, output, session) {
       output$venn_message <- renderPrint({paste(length(names(results_dge))
                                                 ," Venn data table are found:"
                                                 ,paste(names(results_dge),collapse = ", "))})
-      
+
       i=1
       if("DESeq2" %in% names(results_dge)){
         output[[paste0("sel",i)]] <- renderUI({
@@ -1731,7 +1731,7 @@ server = function(input, output, session) {
         })
         i = i + 1
       }
-      
+
       if("edgeR" %in% names(results_dge)){
         output[[paste0("sel",i)]] <- renderUI({
           selectInput(paste0("vsel_","edgeR")
@@ -1743,7 +1743,7 @@ server = function(input, output, session) {
         })
         i = i + 1
       }
-      
+
       if("edgeR_QL" %in% names(results_dge)){
         output[[paste0("sel",i)]] <- renderUI({
           selectInput(paste0("vsel_","edgeR_QL")
@@ -1755,7 +1755,7 @@ server = function(input, output, session) {
         })
         i = i + 1
       }
-      
+
       if("limma" %in% names(results_dge)){
         output[[paste0("sel",i)]] <- renderUI({
           selectInput(paste0("vsel_","limma")
@@ -1770,10 +1770,10 @@ server = function(input, output, session) {
       output$spar <- renderUI({actionButton("setpar_btn", "Set Parameters!")})
     }
   })
-  
+
   observeEvent(input$setpar_btn,{
     i = 1
-    
+
     if("DESeq2" %in% names(results_dge)){
       output[[paste0("m_slider",i)]] <- renderUI({
         sliderInput("v_DESeq2_slider", paste("Define threshold for",input$vsel_DESeq2,"(DESeq2):")
@@ -1783,7 +1783,7 @@ server = function(input, output, session) {
       })
       i = i + 1
     }
-    
+
     if("edgeR" %in% names(results_dge)){
       output[[paste0("m_slider",i)]] <- renderUI({
         sliderInput("v_edgeR_slider", paste("Define threshold for",input$vsel_edgeR,"(edgeR):")
@@ -1793,7 +1793,7 @@ server = function(input, output, session) {
       })
       i = i + 1
     }
-    
+
     if("edgeR_QL" %in% names(results_dge)){
       output[[paste0("m_slider",i)]] <- renderUI({
         sliderInput("v_edgeR_QL_slider", paste("Define threshold for",input$vsel_edgeR_QL,"(edgeR_QL):")
@@ -1803,7 +1803,7 @@ server = function(input, output, session) {
       })
       i = i + 1
     }
-    
+
     if("limma" %in% names(results_dge)){
       output[[paste0("m_slider",i)]] <- renderUI({
         sliderInput("v_limma_slider", paste("Define threshold for",input$vsel_limma,"(limma):")
@@ -1813,21 +1813,21 @@ server = function(input, output, session) {
       })
       i = i + 1
     }
-    
+
     output$gen_venn <- renderUI({actionButton("venndiagram_btn", "Generate Venn Diagrams!")})
   })
-  
+
   observeEvent(input$venndiagram_btn,{
     withProgress(message = "Generating Venn Diagram...",{
       DE_list <- list()
-      
+
       if("DESeq2" %in% names(results_dge)){
         if(input$vsel_DESeq2=="log2FoldChange"){
           dsq <- rownames(subset(results_dge$DESeq2 , abs(eval(parse(text = input$vsel_DESeq2))) > input$v_DESeq2_slider))
         }else{
           dsq <- rownames(subset(results_dge$DESeq2 , abs(eval(parse(text = input$vsel_DESeq2))) <= input$v_DESeq2_slider))
         }
-        
+
         if(any(startsWith(as.character(dsq),"ENS"))==T)
           dsq <- unique(apply(as.data.frame(dsq),MARGIN = 1,
                               FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
@@ -1840,7 +1840,7 @@ server = function(input, output, session) {
         }else{
           edgr <- rownames(subset(results_dge$edgeR , abs(eval(parse(text = input$vsel_edgeR))) <= input$v_edgeR_slider))
         }
-        
+
         if(any(startsWith(as.character(edgr),"ENS"))==T)
           edgr <- unique(apply(as.data.frame(edgr),MARGIN = 1,
                                FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
@@ -1853,7 +1853,7 @@ server = function(input, output, session) {
         }else{
           edgrq <- rownames(subset(results_dge$edgeR_QL , abs(eval(parse(text = input$vsel_edgeR_QL))) <= input$v_edgeR_QL_slider))
         }
-        
+
         if(any(startsWith(as.character(edgrq),"ENS"))==T)
           edgrq <- unique(apply(as.data.frame(edgrq),MARGIN = 1,
                                 FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
@@ -1866,7 +1866,7 @@ server = function(input, output, session) {
         }else{
           lma <- rownames(subset(results_dge$limma , abs(eval(parse(text = input$vsel_limma))) <= input$v_limma_slider))
         }
-        
+
         if(any(startsWith(as.character(lma),"ENS"))==T)
           lma <- unique(apply(as.data.frame(lma),MARGIN = 1,
                               FUN = function(x){if(startsWith(as.character(x),"ENS")){return(strsplit(as.character(x),fixed = T,split = '.')[[1]][1])}
@@ -1890,12 +1890,12 @@ server = function(input, output, session) {
       })
     })
   })
-  
+
   output$venn_output_btn <- downloadHandler(
     filename = "VennDiagram_output.txt",
     content = function(file){write(out,file)}
   )
-  
+
   # })
-  
+
 }
