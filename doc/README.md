@@ -19,7 +19,7 @@ Before installation, please, make sure the following tools are installed and can
 - <a href="https://combine-lab.github.io/salmon/" target="_blank">salmon</a> is a command line tool for quantifying the expression of transcripts using RNA-seq data.
 - <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">fastQC</a> is a quality control tool for high throughput sequence data built in Java.
 - <a href="https://multiqc.info/" target="_blank">multiQC</a> is a command line tool to Aggregate results from bioinformatics analyses across many samples into a single report. Here, `multiQC` is used to aggregate `fastQC` reports across many samples into a single report.
-- <a href="https://www.r-project.org/" target="_blank">R >= 3.5.1</a> is a free software environment for statistical computing and graphics.
+- <a href="https://www.r-project.org/" target="_blank">R</a> is a free software environment for statistical computing and graphics.
 
 You may directly download IRNAA from <a href="http://www.github.com/rosericazondekon/irnaa" target="_blank">IRNAA's Github repository</a>. If you have git installed, you may also clone IRNAA by running:
 
@@ -27,7 +27,7 @@ You may directly download IRNAA from <a href="http://www.github.com/rosericazond
 git clone https://github.com/rosericazondekon/irnaa.git
 ```
 
-Next, extract IRNAA to your local drive. 
+Next, extract IRNAA to your local drive.
 
 To install it on Ubuntu, from the command line interface, change your directory (using the `cd` command) to the extracted local `irnaa` folder on your local drive, and run the following script:
 
@@ -37,14 +37,14 @@ sudo bash linux_install.sh && source ~/.bashrc
 
 On windows computers, before installing IRNAA, make sure that `R` is installed and can be run from the command line.
 
-To make `R` accessible from the command line interface, you may use the following instructions: 
+To make `R` accessible from the command line interface, you may use the following instructions:
 - Find the installation path for `R` and copy it (e.g `C:\Program Files\R\R-3.5.1\bin`)
 - Open the start menu and type in “View advanced system settings”, click on “Environment variables”
 - Under “System variables”, select Path and click on edit
-- Click “New”, and paste in the folder address for R 
+- Click “New”, and paste in the folder address for R
 - Open windows Command Prompt and run `Rscript --version` which should output the version of `R` installed on your computer.
 
-Now, double-click on the `win_install.bat` file (**as administrator**) to install IRNAA on your computer. 
+Now, double-click on the `win_install.bat` file (**as administrator**) to install IRNAA on your computer.
 
 To install it from the DOS command line interface, open your command prompt (**as administrator**), change your directory (using the `cd` command) to the extracted local `irnaa` folder and execute the following code:
 
