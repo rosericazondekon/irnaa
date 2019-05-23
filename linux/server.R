@@ -971,6 +971,13 @@ server = function(input, output, session) {
       actionButton("global_rc_btn", "Explore global read counts!")
     })
 
+    output$clust_method <- renderUI({
+      selectInput("hclust_method", "Choose clustering method:"
+                  ,c("complete","ward.D", "ward.D2", "single","average","mcquitty","median","centroid"),
+                  selected = "complete", multiple = FALSE,
+                  selectize = TRUE, width = "200px", size = NULL)
+    })
+
     output$DESeq2_runDGE <- renderUI({
       actionButton("DESeq2_runDGE_btn", "Run DESeq2 DGE Analysis!")
     })
@@ -1361,7 +1368,7 @@ server = function(input, output, session) {
                   ,column(2, pickerInput(inputId = "d_dist_method", label = "Distance method:"
                                          ,choices = c("euclidean", "maximum","manhattan","canberra","binary","minkowski")
                                          ,selected="euclidean"))
-                  ,column(2, pickerInput(inputId = "hclust_method", label = "Hclust method:"
+                  ,column(2, pickerInput(inputId = "d_hclust_method", label = "Hclust method:"
                                          ,choices = c("complete", "ward.D","ward.D2","single","average","mcquitty","median","centroid")
                                          ,selected="average"))
                   ,column(2, pickerInput(inputId = "d_dendogram", label = "Dendogram:", choices = c("both", "row", "column", "none")
