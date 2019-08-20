@@ -685,7 +685,7 @@ server = function(input, output, session) {
       db<-get(annot_lib)
 
       # Get text2gene dataset
-      txt2gene <- select(db,
+      txt2gene <- AnnotationDbi::select(db,
                          keys = keys(db),
                          columns=c(input$refType,"SYMBOL")#columns=c("REFSEQ","SYMBOL")#,"GENENAME")
                          # ,keytype="ENTREZID"
@@ -702,7 +702,7 @@ server = function(input, output, session) {
       # if(input$refType == "ENSEMBLTRANS"){transcript_out <- TRUE}
 
       # Import quantification reads into R
-      txi <<- tximport(files, type = "salmon", tx2gene = txt2gene,ignoreTxVersion=T,txOut = as.logical(input$transOut))
+      txi <<- tximport::tximport(files, type = "salmon", tx2gene = txt2gene,ignoreTxVersion=T,txOut = as.logical(input$transOut))
 
       output$readCounts_dld <- renderUI({
         downloadButton(outputId = "counts_download",label = "Download expression data!")
@@ -810,8 +810,8 @@ server = function(input, output, session) {
       library(magrittr)
       sampleTable <- data.frame(condition = conditions)
       rownames(sampleTable) <- txi.header
-      dds <- DESeqDataSetFromTximport(txi, sampleTable, ~condition)
-      # dds <- DESeqDataSetFromMatrix(txi, sampleTable, ~condition)
+      dds <- DESeq2::DESeqDataSetFromTximport(txi, sampleTable, ~condition)
+      # dds <- DESeq2::DESeqDataSetFromMatrix(txi, sampleTable, ~condition)
       dds <- dds[ rowSums(counts(dds)) > 0, ] # remove  genes  without  any  counts
       dds <<- dds
 
@@ -841,8 +841,8 @@ server = function(input, output, session) {
       library(magrittr)
       sampleTable <- data.frame(condition = conditions)
       rownames(sampleTable) <- txi.header
-      # dds <- DESeqDataSetFromTximport(txi, sampleTable, ~condition)
-      dds <- DESeqDataSetFromMatrix(txi$counts, sampleTable, ~condition)
+      # dds <- DESeq2::DESeqDataSetFromTximport(txi, sampleTable, ~condition)
+      dds <- DESeq2::DESeqDataSetFromMatrix(txi$counts, sampleTable, ~condition)
       dds <- dds[ rowSums(counts(dds)) > 0, ] # remove  genes  without  any  counts
       dds <<- dds
 

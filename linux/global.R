@@ -14,11 +14,11 @@ repositories <<- c("https://cloud.r-project.org", "https://bioconductor.org/pack
            "https://www.rforge.net", "https://cloud.r-project.org", "http://www.bioconductor.org",
            "http://www.stats.ox.ac.uk/pub/RWin")
 packages <- c("shinydashboardPlus", "shiny", "shinydashboard", "devtools", "vsn", "hexbin", "UpSetR", "gplots", "ROCR", "NMF", "DT",
-              "org.Hs.eg.db", "org.Mm.eg.db", "org.Dr.eg.db", "pheatmap", "tximport", "readr", "TxDb.Hsapiens.UCSC.hg19.knownGene", 
-              "rmarkdown", "edgeR", "shinyWidgets", "shinycssloaders", "CNTools", "openxlsx", "VennDiagram", "plyr", #"shinyjs",
-              "plotly", "heatmaply", "cowplot", "dplyr", "codetools",
-              "DESeq2","ggpubr", "ggplot2", "limma", "biomaRt", "htmlwidgets", "AnnotationDbi", "Biobase", "ensembldb", "shinyjqui",
-              "styler", "shinyAce","shinyFiles", "d3heatmap", "rhandsontable","magrittr","shinyjs","gProfileR", "TCGA2STAT") # CRAN packages
+             "org.Hs.eg.db", "org.Mm.eg.db", "org.Dr.eg.db", "pheatmap", "tximport", "readr", "TxDb.Hsapiens.UCSC.hg19.knownGene",
+             "rmarkdown", "edgeR", "shinyWidgets", "shinycssloaders", "CNTools", "openxlsx", "VennDiagram", "plyr", #"shinyjs",
+             "plotly", "heatmaply", "cowplot", "dplyr", "codetools", "nnet", "stringi", "MASS", "class", "KernSmooth",
+             "DESeq2","ggpubr", "ggplot2", "limma", "biomaRt", "htmlwidgets", "AnnotationDbi", "Biobase", "ensembldb", "shinyjqui",
+             "styler", "shinyAce", "shinyFiles", "d3heatmap", "rhandsontable","magrittr","shinyjs","gProfileR", "TCGA2STAT") # CRAN packages
 
 #"shinyTree"
 # Install and load missing packages
@@ -71,7 +71,7 @@ if(!'shinyDirectoryInput' %in% installed.packages()){
 #     )
 #   )
 # }
-# 
+#
 # # Call this function from the server with the button id that is clicked and the
 # # expression to run when the button is clicked
 # withBusyIndicatorServer <- function(buttonId, expr) {
@@ -87,7 +87,7 @@ if(!'shinyDirectoryInput' %in% installed.packages()){
 #     shinyjs::enable(buttonId)
 #     shinyjs::hide(selector = loadingEl)
 #   })
-#   
+#
 #   # Try to run the code when the button is clicked and show an error message if
 #   # an error occurs or a success message if it completes
 #   tryCatch({
@@ -98,7 +98,7 @@ if(!'shinyDirectoryInput' %in% installed.packages()){
 #     value
 #   }, error = function(err) { errorFunc(err, buttonId) })
 # }
-# 
+#
 # # When an error happens after a button click, show the error
 # errorFunc <- function(err, buttonId) {
 #   errEl <- sprintf("[data-for-btn=%s] .btn-err", buttonId)
@@ -107,7 +107,7 @@ if(!'shinyDirectoryInput' %in% installed.packages()){
 #   shinyjs::html(html = errMessage, selector = errElMsg)
 #   shinyjs::show(selector = errEl, anim = TRUE, animType = "fade")
 # }
-# 
+#
 # appCSS <- "
 # .btn-loading-container {
 #   margin-left: 10px;
