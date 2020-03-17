@@ -136,7 +136,7 @@ You may use your mouse and the `Left/Right` directional keys on your keyboard to
 To stop `IRNAA`, close your Shell Terminal or Windows Command Prompt.
 
 <br/>
-Now, enjoy `IRNAA` and should you have any suggestion, critique, and/or recommendation, feel free to reach out to <roseric_2000@yahoo.fr>.
+Now, enjoy `IRNAA` and should you have any suggestion, critique, and/or recommendation, feel free to reach out to roseric_2000@yahoo.fr.
 
 Thank You!
 
